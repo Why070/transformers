@@ -705,6 +705,19 @@ class Trainer:
         # torch.compile
         if args.torch_compile and not is_torch_compile_available():
             raise RuntimeError("Using torch.compile requires PyTorch 2.0 or higher.")
+    
+    last_memory = 0
+
+    def get_memory_total():
+        global last_memory
+        last_memory = torch.cuda.memory_allocated() / 1024 / 1024 
+        return last_memory
+
+    def get_memory_diff():
+        global last_memory
+        last = last_memory
+        total = get_memory_total()
+        return total - last, total
 
     def add_callback(self, callback):
         """
@@ -1806,7 +1819,9 @@ class Trainer:
 
                 if step % args.gradient_accumulation_steps == 0:
                     self.control = self.callback_handler.on_step_begin(args, self.state, self.control)
-
+                
+                print("\033[1;31mMemory increase during training:\033[0m", get_memory_diff())
+                
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
 
