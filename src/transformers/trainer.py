@@ -1546,17 +1546,14 @@ class Trainer:
     def _inner_training_loop(
         self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
-        def get_gpu_memory_usage():
-            return torch.cuda.memory_allocated() / 1024**3
+        get_gpu_memory_usage=return torch.cuda.memory_allocated()
 
-        
-        print("显存使用量 (before freeing memory): {:.2f} GB".format(get_gpu_memory_usage()))
-
+        print(f"Memory before freeing memory = {get_gpu_memory_usage / 1024 / 1024:.2f} MB")
 
         self.accelerator.free_memory()
 
-
-        print("显存使用量 (after freeing memory): {:.2f} GB".format(get_gpu_memory_usage()))
+        get_gpu_memory_usage=return torch.cuda.memory_allocated()
+        print(f"Memory after freeing memory = {get_gpu_memory_usage / 1024 / 1024:.2f} MB")
         
         self._train_batch_size = batch_size
         logger.debug(f"Currently training with a batch size of: {self._train_batch_size}")
@@ -1627,18 +1624,16 @@ class Trainer:
         )
 
         if self.is_deepspeed_enabled:
-            before_memory = torch.cuda.memory_allocated() / 1024**3
-            print("显存使用情况（deepspeed_init初始化优化器和学习率调度器之前）：", before_memory)
+            
+           
             self.optimizer, self.lr_scheduler = deepspeed_init(self, num_training_steps=max_steps)
-            after_memory = torch.cuda.memory_allocated() / 1024**3
-            print("显存使用情况（deepspeed_init初始化优化器和学习率调度器之后）：", after_memory)
+            
+           
 
         if not delay_optimizer_creation:
-            before_memory = torch.cuda.memory_allocated() / 1024**3
-            print("显存使用情况（create_optimizer_and_scheduler初始化优化器和学习率调度器之前）：", before_memory)
+           
             self.create_optimizer_and_scheduler(num_training_steps=max_steps)
-            after_memory = torch.cuda.memory_allocated() / 1024**3
-            print("显存使用情况（create_optimizer_and_scheduler初始化优化器和学习率调度器之后）：", after_memory)
+          
 
 
         self.state = TrainerState()
@@ -1842,7 +1837,7 @@ class Trainer:
                     total = get_memory_total()
                     return total - last, total
                
-                print("\033[1;31mMemory increase during training:\033[0m", get_memory_diff())
+                print("\033[1;31mMemory occupied during training:\033[0m", get_memory_diff())
                 
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
@@ -1905,26 +1900,26 @@ class Trainer:
                         return torch.cuda.memory_allocated() / 1024 / 1024
                     if is_torch_tpu_available():
                         if self.do_grad_scaling:
-                            print("Memory before optimizer step:", get_memory_total())
+                            print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
                             self.scaler.step(self.optimizer)
-                            print("Memory after optimizer step:", get_memory_total())
+                            print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
                             self.scaler.update()
                         else:
-                            print("Memory before optimizer step:", get_memory_total())
+                            print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
                             xm.optimizer_step(self.optimizer)
-                            print("Memory after optimizer step:", get_memory_total())
+                            print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
                     elif self.do_grad_scaling:
                         scale_before = self.scaler.get_scale()
-                        print("Memory before optimizer step:", get_memory_total())
+                        print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
                         self.scaler.step(self.optimizer)
-                        print("Memory after optimizer step:", get_memory_total())
+                        print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
                         self.scaler.update()
                         scale_after = self.scaler.get_scale()
                         optimizer_was_run = scale_before <= scale_after
                     else:
-                        print("Memory before optimizer step:", get_memory_total())
+                        print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
                         self.optimizer.step()
-                        print("Memory after optimizer step:", get_memory_total())
+                        print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
                     if optimizer_was_run:
@@ -2058,9 +2053,10 @@ class Trainer:
                     f"Transformers but your current version is {__version__}. This is not recommended and could "
                     "yield to errors or unwanted behaviors."
                 )
-        allocated_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
-        print(f"加载权重前memory: {allocated_memory_mb:.2f} MB")
+        
         if os.path.isfile(weights_file) or os.path.isfile(safe_weights_file):
+            allocated_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+            print(f"\033[1;31m加载权重前memory: {allocated_memory_mb:.2f} MB\033[0m")
             # If the model is on the GPU, it still works!
             if is_sagemaker_mp_enabled():
                 if os.path.isfile(os.path.join(resume_from_checkpoint, "user_content.pt")):
@@ -2099,15 +2095,20 @@ class Trainer:
                 # release memory
                 del state_dict
                 self._issue_warnings_after_load(load_result)
+            after_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+            print(f"\033[1;31m加载权重后memory: {after_memory_mb:.2f} MB\033[0m")
         else:
+            allocated_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+            print(f"\033[1;31m加载权重前memory: {allocated_memory_mb:.2f} MB\033[0m")
+            
             # We load the sharded checkpoint
             load_result = load_sharded_checkpoint(
                 model, resume_from_checkpoint, strict=is_sagemaker_mp_enabled(), prefer_safe=self.args.save_safetensors
             )
             if not is_sagemaker_mp_enabled():
                 self._issue_warnings_after_load(load_result)
-        after_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
-        print(f"加载权重后memory: {after_memory_mb:.2f} MB")
+            after_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+            print(f"加载权重后memory: {after_memory_mb:.2f} MB")
 
     def _load_best_model(self):
         logger.info(f"Loading best model from {self.state.best_model_checkpoint} (score: {self.state.best_metric}).")
@@ -2429,10 +2430,10 @@ class Trainer:
             else os.path.isfile(os.path.join(checkpoint, OPTIMIZER_NAME))
         )
         if checkpoint_file_exists and os.path.isfile(os.path.join(checkpoint, SCHEDULER_NAME)):
-            allocated_memory_before = torch.cuda.memory_allocated()
-            print(f"Memory before 加载优化器，学习率调度器状态字典 = {allocated_memory_before / 1024 / 1024:.2f} MB")
             # Load in optimizer and scheduler states
             if is_torch_tpu_available():
+                allocated_memory_before = torch.cuda.memory_allocated()
+                print(f"\033[1;31mMemory before 加载优化器，学习率调度器状态字典 = {allocated_memory_before / 1024 / 1024:.2f} MB\033[0m")
                 # On TPU we have to take some extra precautions to properly load the states on the right device.
                 optimizer_state = torch.load(os.path.join(checkpoint, OPTIMIZER_NAME), map_location="cpu")
                 with warnings.catch_warnings(record=True) as caught_warnings:
@@ -2444,7 +2445,11 @@ class Trainer:
                 
                 self.optimizer.load_state_dict(optimizer_state)
                 self.lr_scheduler.load_state_dict(lr_scheduler_state)
+                allocated_memory_after = torch.cuda.memory_allocated()
+                print(f"\033[1;31mMemory after 加载优化器，学习率调度器状态字典 = {allocated_memory_after / 1024 / 1024:.2f} MB\033[0m")
             else:
+                allocated_memory_before = torch.cuda.memory_allocated()
+                print(f"\033[1;31mMemory before 加载优化器，学习率调度器状态字典 = {allocated_memory_before / 1024 / 1024:.2f} MB\033[0m")
                 if is_sagemaker_mp_enabled():
                     if os.path.isfile(os.path.join(checkpoint, "user_content.pt")):
                         # Optimizer checkpoint was saved with smp >= 1.10
@@ -2485,8 +2490,8 @@ class Trainer:
                 if self.do_grad_scaling and os.path.isfile(os.path.join(checkpoint, SCALER_NAME)):
                     self.scaler.load_state_dict(torch.load(os.path.join(checkpoint, SCALER_NAME)))
             
-            allocated_memory_after = torch.cuda.memory_allocated()
-            print(f"Memory after 加载优化器，学习率调度器状态字典 = {allocated_memory_after / 1024 / 1024:.2f} MB")
+                allocated_memory_after = torch.cuda.memory_allocated()
+                print(f"\033[1;31mMemory after 加载优化器，学习率调度器状态字典 = {allocated_memory_after / 1024 / 1024:.2f} MB\033[0m")
 
     def hyperparameter_search(
         self,
