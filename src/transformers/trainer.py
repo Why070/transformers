@@ -1546,13 +1546,13 @@ class Trainer:
     def _inner_training_loop(
         self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
-        get_gpu_memory_usage=return torch.cuda.memory_allocated()
+        get_gpu_memory_usage=torch.cuda.memory_allocated()
 
         print(f"Memory before freeing memory = {get_gpu_memory_usage / 1024 / 1024:.2f} MB")
 
         self.accelerator.free_memory()
 
-        get_gpu_memory_usage=return torch.cuda.memory_allocated()
+        get_gpu_memory_usage=torch.cuda.memory_allocated()
         print(f"Memory after freeing memory = {get_gpu_memory_usage / 1024 / 1024:.2f} MB")
         
         self._train_batch_size = batch_size
