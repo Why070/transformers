@@ -1821,17 +1821,9 @@ class Trainer:
                     
 
                 def get_memory_total():
-                    global last_memory
-                    last_memory = torch.cuda.memory_allocated() / 1024 / 1024 
-                    return last_memory
-
-                def get_memory_diff():
-                    global last_memory
-                    last = last_memory
-                    total = get_memory_total()
-                    return total - last, total
+                return torch.cuda.memory_allocated() / 1024 / 1024
                
-                print("\033[1;31mMemory occupied during training:\033[0m", get_memory_diff())
+                print("\033[1;31mMemory occupied during training:\033[0m", get_memory_total())
                 
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
