@@ -1546,14 +1546,8 @@ class Trainer:
     def _inner_training_loop(
         self, batch_size=None, args=None, resume_from_checkpoint=None, trial=None, ignore_keys_for_eval=None
     ):
-        get_gpu_memory_usage=torch.cuda.memory_allocated()
-
-        print(f"Memory before freeing memory = {get_gpu_memory_usage / 1024 / 1024:.2f} MB")
-
+       
         self.accelerator.free_memory()
-
-        get_gpu_memory_usage=torch.cuda.memory_allocated()
-        print(f"Memory after freeing memory = {get_gpu_memory_usage / 1024 / 1024:.2f} MB")
         
         self._train_batch_size = batch_size
         logger.debug(f"Currently training with a batch size of: {self._train_batch_size}")
@@ -2125,20 +2119,30 @@ class Trainer:
             or os.path.exists(best_safe_adapter_model_path)
         ):
             if self.is_deepspeed_enabled:
+                allocated_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+                print(f"\033[1;31m加载checkpoint前memory: {allocated_memory_mb:.2f} MB\033[0m")
                 deepspeed_load_checkpoint(self.model_wrapped, self.state.best_model_checkpoint)
+                after_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+                print(f"\033[1;31m加载checkpoint后memory: {after_memory_mb:.2f} MB\033[0m")
             else:
                 has_been_loaded = True
                 if is_sagemaker_mp_enabled():
                     if os.path.isfile(os.path.join(self.state.best_model_checkpoint, "user_content.pt")):
                         # If the 'user_content.pt' file exists, load with the new smp api.
                         # Checkpoint must have been saved with the new smp api.
+                        allocated_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+                        print(f"\033[1;31m加载权重前memory: {allocated_memory_mb:.2f} MB\033[0m")
                         smp.resume_from_checkpoint(
                             path=self.state.best_model_checkpoint,
                             tag=WEIGHTS_NAME,
                             partial=False,
                             load_optimizer=False,
                         )
+                        after_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+                        print(f"\033[1;31m加载权重后memory: {after_memory_mb:.2f} MB\033[0m")
                     else:
+                        allocated_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+                        print(f"\033[1;31m加载状态字典前memory: {allocated_memory_mb:.2f} MB\033[0m")
                         # If the 'user_content.pt' file does NOT exist, load with the old smp api.
                         # Checkpoint must have been saved with the old smp api.
                         if self.args.save_safetensors and os.path.isfile(best_safe_model_path):
@@ -2148,6 +2152,8 @@ class Trainer:
 
                         state_dict["_smp_is_partial"] = False
                         load_result = model.load_state_dict(state_dict, strict=True)
+                        after_memory_mb = torch.cuda.memory_allocated() / 1024 / 1024
+                        print(f"\033[1;31m加载状态字典后memory: {after_memory_mb:.2f} MB\033[0m")
                 elif self.is_fsdp_enabled:
                     self.accelerator.state.fsdp_plugin.load_model(
                         self.accelerator, model, self.state.best_model_checkpoint
@@ -2417,6 +2423,8 @@ class Trainer:
 
     def _load_optimizer_and_scheduler(self, checkpoint):
         """If optimizer and scheduler states exist, load them."""
+        allocated_memory_before = torch.cuda.memory_allocated()
+        print(f"\033[1;31mMemory before 加载优化器，学习率调度器状态字典 = {allocated_memory_before / 1024 / 1024:.2f} MB\033[0m")
         if checkpoint is None:
             return
 
@@ -2432,8 +2440,7 @@ class Trainer:
         if checkpoint_file_exists and os.path.isfile(os.path.join(checkpoint, SCHEDULER_NAME)):
             # Load in optimizer and scheduler states
             if is_torch_tpu_available():
-                allocated_memory_before = torch.cuda.memory_allocated()
-                print(f"\033[1;31mMemory before 加载优化器，学习率调度器状态字典 = {allocated_memory_before / 1024 / 1024:.2f} MB\033[0m")
+                
                 # On TPU we have to take some extra precautions to properly load the states on the right device.
                 optimizer_state = torch.load(os.path.join(checkpoint, OPTIMIZER_NAME), map_location="cpu")
                 with warnings.catch_warnings(record=True) as caught_warnings:
@@ -2445,11 +2452,9 @@ class Trainer:
                 
                 self.optimizer.load_state_dict(optimizer_state)
                 self.lr_scheduler.load_state_dict(lr_scheduler_state)
-                allocated_memory_after = torch.cuda.memory_allocated()
-                print(f"\033[1;31mMemory after 加载优化器，学习率调度器状态字典 = {allocated_memory_after / 1024 / 1024:.2f} MB\033[0m")
+              
             else:
-                allocated_memory_before = torch.cuda.memory_allocated()
-                print(f"\033[1;31mMemory before 加载优化器，学习率调度器状态字典 = {allocated_memory_before / 1024 / 1024:.2f} MB\033[0m")
+             
                 if is_sagemaker_mp_enabled():
                     if os.path.isfile(os.path.join(checkpoint, "user_content.pt")):
                         # Optimizer checkpoint was saved with smp >= 1.10
@@ -2490,8 +2495,8 @@ class Trainer:
                 if self.do_grad_scaling and os.path.isfile(os.path.join(checkpoint, SCALER_NAME)):
                     self.scaler.load_state_dict(torch.load(os.path.join(checkpoint, SCALER_NAME)))
             
-                allocated_memory_after = torch.cuda.memory_allocated()
-                print(f"\033[1;31mMemory after 加载优化器，学习率调度器状态字典 = {allocated_memory_after / 1024 / 1024:.2f} MB\033[0m")
+        allocated_memory_after = torch.cuda.memory_allocated()
+        print(f"\033[1;31mMemory after 加载优化器，学习率调度器状态字典 = {allocated_memory_after / 1024 / 1024:.2f} MB\033[0m")
 
     def hyperparameter_search(
         self,
