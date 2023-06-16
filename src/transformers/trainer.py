@@ -1827,6 +1827,7 @@ class Trainer:
                 
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
+                    print("\033[1;31mMemory occupied after 开始执行训练:\033[0m", get_memory_total())
 
                 if (
                     args.logging_nan_inf_filter
@@ -1837,7 +1838,9 @@ class Trainer:
                     tr_loss += tr_loss / (1 + self.state.global_step - self._globalstep_last_logged)
                 else:
                     tr_loss += tr_loss_step
-
+                
+                print("\033[1;31mMemory occupied after 累加损失值:\033[0m", get_memory_total())
+               
                 self.current_flos += float(self.floating_point_ops(inputs))
 
                 # should this be under the accumulate context manager?
