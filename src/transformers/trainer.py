@@ -15,7 +15,7 @@
 """
 The Trainer class, to easily train a 🤗 Transformers from scratch or finetune it on a new task.
 """
-
+import subprocess
 import contextlib
 import functools
 import glob
@@ -1824,10 +1824,17 @@ class Trainer:
                     return torch.cuda.memory_allocated() / 1024 / 1024
                
                 print("\033[1;31mMemory occupied during training:\033[0m", get_memory_total())
-                
+
+                def get_gpu_memory_usage():
+                    result = subprocess.run(['nvidia-smi'], capture_output=True, text=True)
+                    return result.stdout
+               
+                print("\033[1;31mMemory occupied during training:\033[0m:")
+                print(get_gpu_memory_usage())
+               
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
-                    print("\033[1;31mMemory occupied after 开始执行训练:\033[0m", get_memory_total())
+                    
 
                 if (
                     args.logging_nan_inf_filter
@@ -1840,6 +1847,10 @@ class Trainer:
                     tr_loss += tr_loss_step
                 
                 print("\033[1;31mMemory occupied after 累加损失值:\033[0m", get_memory_total())
+
+                print("\033[1;31mMemory occupied after 累加损失值:\033[0m:")
+                print(get_gpu_memory_usage())
+               
                
                 self.current_flos += float(self.floating_point_ops(inputs))
 
