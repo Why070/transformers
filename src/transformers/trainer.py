@@ -31,7 +31,7 @@ import warnings
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-
+from pynvml import *
 from tqdm.auto import tqdm
 
 
@@ -1897,7 +1897,7 @@ class Trainer:
                     optimizer_was_run = True
                     def get_memory_total():
                         return torch.cuda.memory_allocated() / 1024 / 1024
-                    from pynvml import *
+                    
 
                     # 打印 GPU 内存占用情况
                     def print_gpu_utilization():
@@ -1912,7 +1912,6 @@ class Trainer:
 
                     # 执行梯度更新操作
 
-                    # 在梯度更新后打印 GPU 内存占用情况
                    
                     if is_torch_tpu_available():
                         if self.do_grad_scaling:
