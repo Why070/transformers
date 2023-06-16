@@ -31,7 +31,6 @@ import warnings
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-from pynvml import *
 from tqdm.auto import tqdm
 
 
@@ -1898,21 +1897,11 @@ class Trainer:
                     def get_memory_total():
                         return torch.cuda.memory_allocated() / 1024 / 1024
                     
+        
 
-                    # 打印 GPU 内存占用情况
-                    def print_gpu_utilization():
-                        nvmlInit()
-                        handle = nvmlDeviceGetHandleByIndex(0)
-                        info = nvmlDeviceGetMemoryInfo(handle)
-                        print(f"GPU memory occupied: {info.used // 1024 ** 2} MB.")
-
-                    # 在梯度更新前打印 GPU 内存占用情况
-                    print("GPU 显存占用情况（梯度更新前）:")
-                    print_gpu_utilization()
-
-                    # 执行梯度更新操作
-
-                   
+                    print("\033[1;31mMemory occupied before 梯度更新:\033[0m:")
+                    print(get_gpu_memory_usage())
+                    
                     if is_torch_tpu_available():
                         if self.do_grad_scaling:
                             print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
@@ -1937,8 +1926,8 @@ class Trainer:
                         print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
-                    print("GPU 显存占用情况（梯度更新后）:")
-                    print_gpu_utilization()
+                    print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
+                    print(get_gpu_memory_usage())
 
                     if optimizer_was_run:
                         # Delay optimizer scheduling until metrics are generated
