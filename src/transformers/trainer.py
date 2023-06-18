@@ -1828,7 +1828,7 @@ class Trainer:
                     result = subprocess.run(['nvidia-smi'], capture_output=True, text=True)
                     return result.stdout
                
-                print("\033[1;31mMemory occupied during training:\033[0m:")
+                print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
                
                 with self.accelerator.accumulate(model):
@@ -1845,7 +1845,8 @@ class Trainer:
                 else:
                     tr_loss += tr_loss_step
                 
-                print("\033[1;31mMemory occupied after 累加损失值:\033[0m", get_memory_total())
+                print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
+                print(get_gpu_memory_usage())
 
               
                
