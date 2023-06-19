@@ -1828,6 +1828,9 @@ class Trainer:
                     result = subprocess.run(['nvidia-smi'], capture_output=True, text=True)
                     return result.stdout
                
+                for name, param in model.named_parameters():
+                    print(f"Before: Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
+
                 print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
                
@@ -1847,7 +1850,8 @@ class Trainer:
                 
                 print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
-
+                for name, param in model.named_parameters():
+                    print(f"Before: Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
               
                
                
