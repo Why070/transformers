@@ -1851,7 +1851,7 @@ class Trainer:
                 print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
                 for name, param in model.named_parameters():
-                    print(f"Before: Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
+                    print(f"After: Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
               
                
                
