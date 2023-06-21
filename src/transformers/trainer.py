@@ -1834,6 +1834,10 @@ class Trainer:
                 print(get_gpu_memory_usage())
                
                 with self.accelerator.accumulate(model):
+
+                print("\033[1;31mMemory occupied after 梯度累计1:\033[0m:")
+                print(get_gpu_memory_usage())
+                    
                     tr_loss_step = self.training_step(model, inputs)
                     
 
@@ -1847,7 +1851,7 @@ class Trainer:
                 else:
                     tr_loss += tr_loss_step
                 
-                print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
+                print("\033[1;31mMemory occupied after 梯度累计2:\033[0m:")
                 print(get_gpu_memory_usage())
                 
               
