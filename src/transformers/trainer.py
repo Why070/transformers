@@ -1835,11 +1835,10 @@ class Trainer:
                
                 with self.accelerator.accumulate(model):
 
+                                        
+                    tr_loss_step = self.training_step(model, inputs)
                     print("\033[1;31mMemory occupied after 梯度累计1:\033[0m:")
                     print(get_gpu_memory_usage())
-                    
-                    tr_loss_step = self.training_step(model, inputs)
-                    
 
                 if (
                     args.logging_nan_inf_filter
