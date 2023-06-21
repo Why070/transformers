@@ -1828,8 +1828,7 @@ class Trainer:
                     result = subprocess.run(['nvidia-smi'], capture_output=True, text=True)
                     return result.stdout
                
-                for name, param in model.named_parameters():
-                    print(f"Before: Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
+                
 
                 print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
@@ -1850,8 +1849,7 @@ class Trainer:
                 
                 print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
-                for name, param in model.named_parameters():
-                    print(f"After: Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
+                
               
                
                
@@ -1909,26 +1907,26 @@ class Trainer:
                     
                     if is_torch_tpu_available():
                         if self.do_grad_scaling:
-                            print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
+                            
                             self.scaler.step(self.optimizer)
-                            print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
+                            
                             self.scaler.update()
                         else:
-                            print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
+                            
                             xm.optimizer_step(self.optimizer)
-                            print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
+                            
                     elif self.do_grad_scaling:
                         scale_before = self.scaler.get_scale()
-                        print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
+                        
                         self.scaler.step(self.optimizer)
-                        print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
+                        
                         self.scaler.update()
                         scale_after = self.scaler.get_scale()
                         optimizer_was_run = scale_before <= scale_after
                     else:
-                        print("\033[1;31mMemory before 梯度更新:\033[0m", get_memory_total())
+                        
                         self.optimizer.step()
-                        print("\033[1;31mMemory after 梯度更新:\033[0m", get_memory_total())
+                        
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
                     print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
