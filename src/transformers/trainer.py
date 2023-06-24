@@ -1821,6 +1821,9 @@ class Trainer:
 
                 def get_memory_total():
                     return torch.cuda.memory_allocated() / 1024 / 1024
+
+                def get_memory():
+                    return torch.cuda.memory_summary() / 1024 / 1024
                
                 print("\033[1;31mMemory occupied during training:\033[0m", get_memory_total())
 
@@ -1839,6 +1842,8 @@ class Trainer:
                     tr_loss_step = self.training_step(model, inputs)
                     print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
                     print(get_gpu_memory_usage())
+                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print(get_memory())
 
                 if (
                     args.logging_nan_inf_filter
