@@ -1823,7 +1823,7 @@ class Trainer:
                     return torch.cuda.memory_allocated() / 1024 / 1024
 
                 def get_memory():
-                    return torch.cuda.memory_summary() / 1024 / 1024
+                    return torch.cuda.memory_summary() 
                
                 print("\033[1;31mMemory occupied during training:\033[0m", get_memory_total())
 
