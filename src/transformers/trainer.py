@@ -1844,6 +1844,8 @@ class Trainer:
                     print(get_gpu_memory_usage())
                     print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
                     print(get_memory())
+                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print(get_memory_total())
 
                 if (
                     args.logging_nan_inf_filter
