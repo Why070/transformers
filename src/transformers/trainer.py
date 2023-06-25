@@ -1916,10 +1916,10 @@ class Trainer:
                         return str(torch.cuda.memory_summary())  
                     
 
-                    print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
+                    print("\033[1;31mMemory occupied before 梯度更新:\033[0m:")
                     print(get_gpu_memory_usage())
 
-                    print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
+                    print("\033[1;31mMemory occupied before 梯度更新:\033[0m:")
                     print(get_memory())
                     
                     if is_torch_tpu_available():
@@ -1946,10 +1946,10 @@ class Trainer:
                         
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
-                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
                     print(get_gpu_memory_usage())
 
-                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
                     print(get_memory())
 
                     if optimizer_was_run:
