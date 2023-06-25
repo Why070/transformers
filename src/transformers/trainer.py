@@ -1833,23 +1833,21 @@ class Trainer:
                
                 
 
-                print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
+                print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
 
-                print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
+                print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
                 print(get_memory())
                
                 with self.accelerator.accumulate(model):
 
                                         
                     tr_loss_step = self.training_step(model, inputs)
-                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                     print(get_gpu_memory_usage())
-                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                     print(get_memory())
-                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
-                    print(get_memory_total())
-
+                    
                 if (
                     args.logging_nan_inf_filter
                     and not is_torch_tpu_available()
