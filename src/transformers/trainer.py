@@ -1835,6 +1835,9 @@ class Trainer:
 
                 print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
                 print(get_gpu_memory_usage())
+
+                print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
+                print(get_memory())
                
                 with self.accelerator.accumulate(model):
 
