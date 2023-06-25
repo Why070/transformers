@@ -1911,11 +1911,16 @@ class Trainer:
                     optimizer_was_run = True
                     def get_memory_total():
                         return torch.cuda.memory_allocated() / 1024 / 1024
-                    
-        
 
-                    print("\033[1;31mMemory occupied before 梯度更新:\033[0m:")
+                    def get_memory():
+                        return str(torch.cuda.memory_summary())  
+                    
+
+                    print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
                     print(get_gpu_memory_usage())
+
+                    print("\033[1;31mMemory occupied before 损失值累计:\033[0m:")
+                    print(get_memory())
                     
                     if is_torch_tpu_available():
                         if self.do_grad_scaling:
@@ -1941,8 +1946,11 @@ class Trainer:
                         
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
-                    print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
+                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
                     print(get_gpu_memory_usage())
+
+                    print("\033[1;31mMemory occupied after 损失值累计:\033[0m:")
+                    print(get_memory())
 
                     if optimizer_was_run:
                         # Delay optimizer scheduling until metrics are generated
