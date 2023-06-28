@@ -1843,6 +1843,10 @@ class Trainer:
 
                                         
                     tr_loss_step = self.training_step(model, inputs)
+
+                # 计算损失函数值
+                loss = compute_loss(tr_loss_step)
+
                 # 执行反向传播以计算梯度
                 self.accelerator.backward()
 
