@@ -1828,7 +1828,7 @@ class Trainer:
                 print("\033[1;31mMemory occupied during training:\033[0m", get_memory_total())
 
                 def get_gpu_memory_usage():
-                    result = subprocess.run(['nvidia-smi'], capture_output=True, text=True)
+                    result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
                     return result.stdout
                
                 
@@ -1843,6 +1843,17 @@ class Trainer:
 
                                         
                     tr_loss_step = self.training_step(model, inputs)
+                # 执行反向传播以计算梯度
+                self.accelerator.backward()
+
+                # 获取累积的梯度
+                grads = [param.grad for param in model.parameters()]
+
+                # 打印或记录梯度
+                for i, grad in enumerate(grads):
+                    print(f'梯度 {i+1}:')
+                    print(grad)
+                    
                     print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                     print(get_gpu_memory_usage())
                     print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
