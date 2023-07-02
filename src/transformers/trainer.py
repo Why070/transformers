@@ -1845,25 +1845,9 @@ class Trainer:
                                         
                     tr_loss_step = self.training_step(model, inputs)
 
-                # 计算损失函数值
-                loss_fn = nn.CrossEntropyLoss()
-
-                # 前向传播计算预测结果
-                outputs = model(inputs)
-        
-                # 计算损失值
-                loss = loss_fn(outputs, labels)
-
-                # 执行反向传播以计算梯度
-                self.accelerator.backward()
-
-                # 获取累积的梯度
-                grads = [param.grad for param in model.parameters()]
-
-                # 打印或记录梯度
-                for i, grad in enumerate(grads):
-                    print(f'梯度 {i+1}:')
-                    print(grad)
+                for name, param in model.named_parameters():
+                    if param.grad is not None:
+                        print(f"Gradient of parameter {name}: {param.grad}")
                     
                     print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                     print(get_gpu_memory_usage())
