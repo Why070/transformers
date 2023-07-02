@@ -1847,10 +1847,10 @@ class Trainer:
                     if param.grad is not None:
                         print(f"Gradient of parameter {name}: Size: {param.grad.size()}, Type: {param.grad.dtype}")
                     
-                    print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
-                    print(get_gpu_memory_usage())
-                    print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
-                    print(get_memory())
+                print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
+                print(get_gpu_memory_usage())
+                print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
+                print(get_memory())
                     
                 if (
                     args.logging_nan_inf_filter
