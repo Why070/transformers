@@ -2744,6 +2744,8 @@ class Trainer:
         else:
             self.accelerator.backward(loss)
         
+        print(f"Memory usage change: {torch.cuda.memory_allocated()}")
+        
         for name, param in model.named_parameters():
             if param.grad is not None:
                 print(f"Gradient of parameter {name}: {param.grad}, Size: {param.grad.size()}, Type: {param.grad.dtype}")
