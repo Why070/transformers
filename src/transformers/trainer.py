@@ -2746,7 +2746,7 @@ class Trainer:
         
         for name, param in model.named_parameters():
             if param.grad is not None:
-                print(f"Gradient of parameter {name}: Size: {param.grad.size()}, Type: {param.grad.dtype}")
+                print(f"Gradient of parameter {name}: {param.grad}, Size: {param.grad.size()}, Type: {param.grad.dtype}")
 
 
         return loss.detach() / self.args.gradient_accumulation_steps
