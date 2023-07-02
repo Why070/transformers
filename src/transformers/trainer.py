@@ -1843,9 +1843,6 @@ class Trainer:
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
 
-                for name, param in model.named_parameters():
-                    if param.grad is not None:
-                        print(f"Gradient of parameter {name}: Size: {param.grad.size()}, Type: {param.grad.dtype}")
                     
                 print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                 print(get_gpu_memory_usage())
@@ -2746,6 +2743,11 @@ class Trainer:
                 scaled_loss.backward()
         else:
             self.accelerator.backward(loss)
+        
+        for name, param in model.named_parameters():
+            if param.grad is not None:
+                print(f"Gradient of parameter {name}: Size: {param.grad.size()}, Type: {param.grad.dtype}")
+
 
         return loss.detach() / self.args.gradient_accumulation_steps
 
