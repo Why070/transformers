@@ -56,6 +56,7 @@ from .integrations import (
 import numpy as np
 import torch
 import torch.distributed as dist
+import torch.nn as nn
 from huggingface_hub import Repository, create_repo
 from packaging import version
 from torch import nn
@@ -1845,7 +1846,13 @@ class Trainer:
                     tr_loss_step = self.training_step(model, inputs)
 
                 # 计算损失函数值
-                loss = compute_loss(tr_loss_step)
+                loss_fn = nn.CrossEntropyLoss()
+
+                # 前向传播计算预测结果
+                outputs = model(inputs)
+        
+                # 计算损失值
+                loss = loss_fn(outputs, labels)
 
                 # 执行反向传播以计算梯度
                 self.accelerator.backward()
