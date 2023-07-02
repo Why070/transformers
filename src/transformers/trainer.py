@@ -1847,7 +1847,7 @@ class Trainer:
 
                 for name, param in model.named_parameters():
                     if param.grad is not None:
-                        print(f"Gradient of parameter {name}: {param.grad}")
+                         print(f"Gradient of parameter {name}: Size: {param.grad.size()}, Type: {param.grad.dtype}")
                     
                     print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
                     print(get_gpu_memory_usage())
