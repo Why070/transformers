@@ -2746,10 +2746,6 @@ class Trainer:
         
         print(f"\033[1;31mMemory usage change: {torch.cuda.memory_allocated()/ 1024 / 1024}\033[0m")
        
-        
-        for name, param in model.named_parameters():
-            if param.grad is not None:
-                print(f"\033[1;31mGradient of parameter {name}: {param.grad}, Size: {param.grad.size()}, Type: {param.grad.dtype}\033[0m")
 
 
         return loss.detach() / self.args.gradient_accumulation_steps
