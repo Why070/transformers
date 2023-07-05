@@ -1890,7 +1890,11 @@ class Trainer:
                     optimizer_was_run = True
                     def get_memory_total():
                         return torch.cuda.memory_allocated() / 1024 / 1024
-
+                   
+                    def get_gpu_memory_usage():
+                        result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
+                        return result.stdout
+                   
                     def get_memory():
                         return str(torch.cuda.memory_summary())  
                     
