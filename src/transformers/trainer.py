@@ -1819,35 +1819,15 @@ class Trainer:
                     self.control = self.callback_handler.on_step_begin(args, self.state, self.control)
                     
                     
-
-                def get_memory_total():
-                    return torch.cuda.memory_allocated() / 1024 / 1024
-
-                def get_memory():
-                    return str(torch.cuda.memory_summary())   
-               
-                print("\033[1;31mMemory occupied during training:\033[0m", get_memory_total())
-
-                def get_gpu_memory_usage():
-                    result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
-                    return result.stdout
                
                 
 
-                print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
-                print(get_gpu_memory_usage())
-
-                print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
-                print(get_memory())
-               
+              
                 with self.accelerator.accumulate(model):
                     tr_loss_step = self.training_step(model, inputs)
 
                     
-                print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
-                print(get_gpu_memory_usage())
-                print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
-                print(get_memory())
+               
                     
                 if (
                     args.logging_nan_inf_filter
@@ -2726,6 +2706,24 @@ class Trainer:
         model.train()
         inputs = self._prepare_inputs(inputs)
 
+        def get_memory():
+             return str(torch.cuda.memory_summary())   
+               
+
+        def get_gpu_memory_usage():
+            result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
+            return result.stdout
+               
+                
+
+        print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
+        print(get_gpu_memory_usage())
+
+        print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
+        print(get_memory())
+                            
+                
+        
         if is_sagemaker_mp_enabled():
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
             return loss_mb.reduce_mean().detach().to(self.args.device)
@@ -2743,6 +2741,11 @@ class Trainer:
                 scaled_loss.backward()
         else:
             self.accelerator.backward(loss)
+
+        print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
+        print(get_gpu_memory_usage())
+        print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
+        print(get_memory())
         
         print(f"\033[1;31mMemory usage change: {torch.cuda.memory_allocated()/ 1024 / 1024}\033[0m")
        
