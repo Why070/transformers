@@ -2736,7 +2736,7 @@ class Trainer:
         with self.compute_loss_context_manager():
             loss = self.compute_loss(model, inputs)
 
-        print("\033[1;31mMemory occupied after 2:\033[0m:")
+        print("\033[1;31mMemory occupied after compute loss:\033[0m:")
         print(get_memory())
 
         if self.args.n_gpu > 1:
@@ -2775,16 +2775,18 @@ class Trainer:
         def get_memory():
              return str(torch.cuda.memory_summary())  
         
-        print("\033[1;31mMemory occupied before ee:\033[0m:")
+        print("\033[1;31mMemory occupied before labels:\033[0m:")
         print(get_memory())    
         
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
+            print("\033[1;31mMemory occupied after 赋值labels:\033[0m:")
+            print(get_memory())   
         else:
             labels = None
         outputs = model(**inputs)
 
-        print("\033[1;31mMemory occupied after ee:\033[0m:")
+        print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())    
         
         # Save past state if it exists
@@ -2794,18 +2796,15 @@ class Trainer:
         if self.args.past_index >= 0:
             self._past = outputs[self.args.past_index]
 
-            print("\033[1;31mMemory occupied after aa:\033[0m:")
-            print(get_memory())    
+            
 
         if labels is not None:
-            print("\033[1;31mMemory occupied before label_smoother:\033[0m:")
-            print(get_memory())  
+            
             if unwrap_model(model)._get_name() in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES.values():
                 loss = self.label_smoother(outputs, labels, shift_labels=True)
             else:
                 loss = self.label_smoother(outputs, labels)
-            print("\033[1;31mMemory occupied after label_smoother:\033[0m:")
-            print(get_memory())    
+             
         else:
             if isinstance(outputs, dict) and "loss" not in outputs:
                 raise ValueError(
