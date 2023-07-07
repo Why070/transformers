@@ -2745,17 +2745,15 @@ class Trainer:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
         if self.do_grad_scaling:
-            self.scaler.scale(loss).backward()
-        
-        print("\033[1;31mMemory occupied after 3:\033[0m:")
-        print(get_memory())
+            self.scaler.scale(loss).backward()        
+            print("\033[1;31mMemory occupied after 3:\033[0m:")
+            print(get_memory())
         
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                 scaled_loss.backward()
-        
-        print("\033[1;31mMemory occupied after 4:\033[0m:")
-        print(get_memory())
+            print("\033[1;31mMemory occupied after 4:\033[0m:")
+            print(get_memory())
         else:
             self.accelerator.backward(loss)
     
