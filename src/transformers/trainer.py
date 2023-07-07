@@ -2732,19 +2732,33 @@ class Trainer:
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
             return loss_mb.reduce_mean().detach().to(self.args.device)
 
+        print("\033[1;31mMemory occupied after 1:\033[0m:")
+        print(get_memory())
+
         with self.compute_loss_context_manager():
             loss = self.compute_loss(model, inputs)
+
+        print("\033[1;31mMemory occupied after 2:\033[0m:")
+        print(get_memory())
 
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
         if self.do_grad_scaling:
             self.scaler.scale(loss).backward()
+        
+        print("\033[1;31mMemory occupied after 3:\033[0m:")
+        print(get_memory())
+        
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                 scaled_loss.backward()
+        
+        print("\033[1;31mMemory occupied after 4:\033[0m:")
+        print(get_memory())
         else:
             self.accelerator.backward(loss)
+    
 
         print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
         print(get_gpu_memory_usage())
