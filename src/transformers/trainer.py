@@ -2732,8 +2732,6 @@ class Trainer:
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
             return loss_mb.reduce_mean().detach().to(self.args.device)
 
-        print("\033[1;31mMemory occupied after 1:\033[0m:")
-        print(get_memory())
 
         with self.compute_loss_context_manager():
             loss = self.compute_loss(model, inputs)
@@ -2746,14 +2744,12 @@ class Trainer:
 
         if self.do_grad_scaling:
             self.scaler.scale(loss).backward()        
-            print("\033[1;31mMemory occupied after 3:\033[0m:")
-            print(get_memory())
+           
         
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                 scaled_loss.backward()
-            print("\033[1;31mMemory occupied after 4:\033[0m:")
-            print(get_memory())
+            
         else:
             self.accelerator.backward(loss)
     
@@ -2776,21 +2772,40 @@ class Trainer:
 
         Subclass and override for custom behavior.
         """
+        def get_memory():
+             return str(torch.cuda.memory_summary())  
+        
+        print("\033[1;31mMemory occupied before ee:\033[0m:")
+        print(get_memory())    
+        
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
         else:
             labels = None
         outputs = model(**inputs)
+
+        print("\033[1;31mMemory occupied after ee:\033[0m:")
+        print(get_memory())    
+        
         # Save past state if it exists
         # TODO: this needs to be fixed and made cleaner later.
+ 
+        
         if self.args.past_index >= 0:
             self._past = outputs[self.args.past_index]
 
+            print("\033[1;31mMemory occupied after aa:\033[0m:")
+            print(get_memory())    
+
         if labels is not None:
+            print("\033[1;31mMemory occupied before label_smoother:\033[0m:")
+            print(get_memory())  
             if unwrap_model(model)._get_name() in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES.values():
                 loss = self.label_smoother(outputs, labels, shift_labels=True)
             else:
                 loss = self.label_smoother(outputs, labels)
+            print("\033[1;31mMemory occupied after label_smoother:\033[0m:")
+            print(get_memory())    
         else:
             if isinstance(outputs, dict) and "loss" not in outputs:
                 raise ValueError(
