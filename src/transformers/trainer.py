@@ -2751,8 +2751,9 @@ class Trainer:
         print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
         print(get_memory())
         
-        print(f"\033[1;31mMemory usage change: {torch.cuda.memory_allocated()/ 1024 / 1024}\033[0m")
-       
+        max_memory_reserved = torch.cuda.max_memory_reserved()
+        max_memory_reserved_mb = max_memory_reserved / 1024**2
+        print(f"\033[1;31mMax Memory Reserved: {max_memory_reserved_mb:.2f} MB\033[0m:")
 
 
         return loss.detach() / self.args.gradient_accumulation_steps
