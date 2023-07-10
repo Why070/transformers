@@ -2780,8 +2780,7 @@ class Trainer:
         
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
-            print("\033[1;31mMemory occupied after 赋值labels:\033[0m:")
-            print(get_memory())   
+               
         else:
             labels = None
         outputs = model(**inputs)
