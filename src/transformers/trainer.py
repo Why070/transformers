@@ -357,6 +357,7 @@ class Trainer:
             if model_init is not None:
                 self.model_init = model_init
                 model = self.call_model_init()
+                print("model = self.call_model_init()了")
             else:
                 raise RuntimeError("`Trainer` requires either a `model` or `model_init` argument")
         else:
