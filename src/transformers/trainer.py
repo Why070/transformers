@@ -2776,7 +2776,7 @@ class Trainer:
         def get_memory():
              return str(torch.cuda.memory_summary())  
         
-        print("\033[1;31mMemory occupied before labels:\033[0m:")
+        print("\033[1;31mMemory occupied before output:\033[0m:")
         print(get_memory())    
         
         if self.label_smoother is not None and "labels" in inputs:
@@ -2795,6 +2795,8 @@ class Trainer:
         
         if self.args.past_index >= 0:
             self._past = outputs[self.args.past_index]
+            print("\033[1;31mMemory occupied after selfpast:\033[0m:")
+            print(get_memory()) 
 
             
 
