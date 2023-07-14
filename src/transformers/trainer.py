@@ -2781,8 +2781,12 @@ class Trainer:
             return result.stdout
         
         def print_intermediate_output(module, input, output):
-            for name, tensor in zip(module._buffers.keys(), output):
-                print(f"Intermediate Output - Name: {name}, Size: {tensor.size()}, Type: {tensor.dtype}")
+            for hook in module._forward_pre_hooks.values():
+                if isinstance(hook, torch.nn.modules.module._ForwardHook):
+                    tensor_name = hook.tensor_name
+                    tensor_size = output.size()
+                    tensor_type = output.dtype
+                    print(f"Intermediate Output - Name: {tensor_name}, Size: {tensor_size}, Type: {tensor_type}")
 
         # 注册钩子函数
         hook_handle = model.register_forward_hook(print_intermediate_output)
