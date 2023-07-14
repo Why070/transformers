@@ -2781,7 +2781,8 @@ class Trainer:
             return result.stdout
         
         def print_intermediate_output(module, input, output):
-            print("Intermediate Output:", output)
+            for name, tensor in zip(module._buffers.keys(), output):
+                print(f"Intermediate Output - Name: {name}, Size: {tensor.size()}, Type: {tensor.dtype}")
 
         # 注册钩子函数
         hook_handle = model.register_forward_hook(print_intermediate_output)
