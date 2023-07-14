@@ -2780,9 +2780,18 @@ class Trainer:
             result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
             return result.stdout
         
+        def print_intermediate_output(module, input, output):
+            print("Intermediate Output:", output)
+
+        # 注册钩子函数
+        hook_handle = model.register_forward_hook(print_intermediate_output)
+
+        
         print("\033[1;31mMemory occupied before output:\033[0m:")
         print(get_memory())    
         print(get_gpu_memory_usage())  
+
+        
         
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
@@ -2794,6 +2803,9 @@ class Trainer:
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
         print(get_gpu_memory_usage())  
+
+        # 注销钩子函数
+        hook_handle.remove()
         
         # Save past state if it exists
         # TODO: this needs to be fixed and made cleaner later.
