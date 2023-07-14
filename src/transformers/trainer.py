@@ -2781,10 +2781,9 @@ class Trainer:
             return result.stdout
         
         def print_intermediate_output(module, input, output):
-            tensor_name = module.original_name  # 假设模块有一个属性 original_name，保存了张量的名称
             tensor_size = output.size()
             tensor_type = output.dtype
-            print(f"Intermediate Output - Name: {tensor_name}, Size: {tensor_size}, Type: {tensor_type}")
+            print(f"Intermediate Output - Size: {tensor_size}, Type: {tensor_type}")
 
         # 注册钩子函数
         hook_handle = model.register_forward_hook(print_intermediate_output)
