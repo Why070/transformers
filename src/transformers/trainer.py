@@ -2783,6 +2783,8 @@ class Trainer:
         def print_intermediate_output(module, input, output):
             print("中间输出：", output)
             logits = output.logits
+            past_key_values=output.past_key_values
+            attentions=output.attentions
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
             print("past_key_values size:", past_key_values.size(),"past_key_values dtype:", past_key_values.dtype)
             print("attentions size:", attentions.size(),"attentions dtype:", attentions.dtype)
