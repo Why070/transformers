@@ -2785,7 +2785,6 @@ class Trainer:
             logits = output.logits
             loss = output.loss
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
-            print("loss size:", loss.size(),"loss dtype:", loss.dtype)
             print("内存占用（logits）：", output.logits.element_size() * output.logits.nelement() / 1024/1024, "MB")
             
         # 注册钩子函数
