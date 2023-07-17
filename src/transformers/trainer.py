@@ -2786,7 +2786,6 @@ class Trainer:
             past_key_values=output.past_key_values
             attentions=output.attentions
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
-            print("attentions size:", attentions.size(),"attentions dtype:", attentions.dtype)
             print("内存占用（logits）：", output.logits.element_size() * output.logits.nelement() / 1024/1024, "MB")
             
         # 注册钩子函数
