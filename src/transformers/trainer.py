@@ -2783,10 +2783,11 @@ class Trainer:
         def print_intermediate_output(module, input, output):
             print("中间输出：", output)
             logits = output.logits
-            print("logits张量：", logits)
-            print("size:", logits.size(), "dtype:", logits.dtype)
+            print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
+            print("past_key_values size:", past_key_values.size(),"past_key_values dtype:", past_key_values.dtype)
+            print("attentions size:", attentions.size(),"attentions dtype:", attentions.dtype)
             print("内存占用（logits）：", output.logits.element_size() * output.logits.nelement() / 1024/1024, "MB")
-
+            
         # 注册钩子函数
         hook_handle = model.register_forward_hook(print_intermediate_output)
 
