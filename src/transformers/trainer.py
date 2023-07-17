@@ -2783,9 +2783,9 @@ class Trainer:
         def print_intermediate_output(module, input, output):
             print("中间输出：", output)
             logits = output.logits
-            past_key_values=output.past_key_values
-            attentions=output.attentions
+            loss = output.loss
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
+            print("loss size:", loss.size(),"loss dtype:", loss.dtype)
             print("内存占用（logits）：", output.logits.element_size() * output.logits.nelement() / 1024/1024, "MB")
             
         # 注册钩子函数
