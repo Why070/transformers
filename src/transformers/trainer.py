@@ -2810,8 +2810,7 @@ class Trainer:
         print(model.forward.__code__.co_varnames)
         
         for single_input in inputs:
-            input_dict = {'input_key': single_input}  # 将字符串包装在字典中
-            output = model(**input_dict)
+            output = model(single_input)
             
         for output in intermediate_outputs:
             print(output)
