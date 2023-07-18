@@ -2806,6 +2806,8 @@ class Trainer:
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
         print(get_gpu_memory_usage())  
+
+        print(model.forward.__code__.co_varnames)
         
         for single_input in inputs:
             input_dict = {'input_key': single_input}  # 将字符串包装在字典中
