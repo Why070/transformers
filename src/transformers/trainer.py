@@ -2806,8 +2806,10 @@ class Trainer:
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
         print(get_gpu_memory_usage())  
-
-        for single_input in inputs:
+        
+        inputs_dict = {key: [value] for key, value in inputs.items()}
+        
+        for single_input in inputs_dict:
             output = model(**single_input)
             
         for output in intermediate_outputs:
