@@ -2809,7 +2809,7 @@ class Trainer:
 
         print(model.forward.__code__.co_varnames)
         
-        for single_input in inputs:
+        for single_input in inputs.values():
             output = model(single_input)
             
         for output in intermediate_outputs:
