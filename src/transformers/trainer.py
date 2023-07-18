@@ -2807,6 +2807,9 @@ class Trainer:
         print(get_memory())
         print(get_gpu_memory_usage())  
 
+        for single_input in inputs:
+            output = model(**single_input)
+            
         for output in intermediate_outputs:
             print(output)
             logits = output.logits
