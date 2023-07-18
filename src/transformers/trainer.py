@@ -2780,12 +2780,11 @@ class Trainer:
             result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
             return result.stdout
         
+        intermediate_outputs = []
+        
         def print_intermediate_output(module, input, output):
-            print("中间输出：", output)
-            logits = output.logits
-            loss = output.loss
-            print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
-            print("内存占用（logits）：", output.logits.element_size() * output.logits.nelement() / 1024/1024, "MB")
+            intermediate_outputs.append(output)
+        
             
         # 注册钩子函数
         hook_handle = model.register_forward_hook(print_intermediate_output)
@@ -2807,6 +2806,11 @@ class Trainer:
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
         print(get_gpu_memory_usage())  
+
+        for output in intermediate_outputs:
+            print(output)
+            logits = output.logits
+            print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
 
         # 注销钩子函数
         hook_handle.remove()
