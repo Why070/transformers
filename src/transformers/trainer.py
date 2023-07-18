@@ -2807,10 +2807,9 @@ class Trainer:
         print(get_memory())
         print(get_gpu_memory_usage())  
         
-        inputs_dict = {key: [value] for key, value in inputs.items()}
-        
-        for single_input in inputs_dict:
-            output = model(**single_input)
+        for single_input in inputs:
+            input_dict = {'input_key': single_input}  # 将字符串包装在字典中
+            output = model(**input_dict)
             
         for output in intermediate_outputs:
             print(output)
