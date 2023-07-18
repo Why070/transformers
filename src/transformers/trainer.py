@@ -2801,7 +2801,9 @@ class Trainer:
                
         else:
             labels = None
-        outputs = model(**inputs)
+        
+        for single_input in inputs.values():
+            output = model(single_input)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
@@ -2809,8 +2811,7 @@ class Trainer:
 
         print(model.forward.__code__.co_varnames)
         
-        for single_input in inputs.values():
-            output = model(single_input)
+        
             
         for output in intermediate_outputs:
             print(output)
