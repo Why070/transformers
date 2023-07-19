@@ -2782,8 +2782,8 @@ class Trainer:
         
         intermediate_outputs = []
         
-        def print_intermediate_output(module, input, output):
-            intermediate_outputs.append(output)
+        def print_intermediate_output(module, inputs, outputs):
+            intermediate_outputs.append(outputs)
         
             
         # 注册钩子函数
@@ -2812,9 +2812,9 @@ class Trainer:
         
         
             
-        for output in intermediate_outputs:
-            print(output)
-            logits = output.logits
+        for outputs in intermediate_outputs:
+            print(outputs)
+            logits = outputs.logits
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
 
         # 注销钩子函数
