@@ -2782,8 +2782,8 @@ class Trainer:
         
         intermediate_outputs = []
         
-        def print_intermediate_output(model, inputs, outputs):
-            intermediate_outputs.append(outputs)
+        def print_intermediate_output(module, input, output):
+            intermediate_outputs.append(output)
         
             
         # 注册钩子函数
@@ -2802,8 +2802,7 @@ class Trainer:
         else:
             labels = None
         
-        for single_input in inputs.values():
-            outputs = model(single_input)
+         outputs = model(**inputs)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
@@ -2813,8 +2812,8 @@ class Trainer:
         
         
             
-        for outputs in intermediate_outputs:
-            print(outputs)
+        for intermediate_output in intermediate_outputs:
+            print(intermediate_output)
             logits = outputs.logits
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
 
