@@ -2811,9 +2811,9 @@ class Trainer:
 
         print(model.forward.__code__.co_varnames)
 
-        for i, intermediate_output in enumerate(intermediate_outputs):
+        for i, outputs in enumerate(intermediate_outputs):
             print("Output of layer", i)
-            logit=intermediate_output.logits
+            logit=outputs.logits
             print("logits.size:", logit.size(), "logits.dtype:", logit.dtype)
 
         # 注销钩子函数
