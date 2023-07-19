@@ -2811,7 +2811,7 @@ class Trainer:
 
         print(model.forward.__code__.co_varnames)
 
-        for intermediate_output in enumerate(intermediate_outputs):
+        for intermediate_output in intermediate_outputs:
             print("Output size:", intermediate_output.size(), "Output dtype:", intermediate_output.dtype)
 
         # 注销钩子函数
