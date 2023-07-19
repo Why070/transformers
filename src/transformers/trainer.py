@@ -29,6 +29,7 @@ import sys
 import time
 import warnings
 import copy
+import numpy as np
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
@@ -2783,8 +2784,9 @@ class Trainer:
         
         intermediate_outputs = []
         
-        def print_intermediate_output(module, input, output):
-            intermediate_outputs.append(copy.deepcopy(output))
+       def print_intermediate_output(module, input, output):
+            intermediate_outputs.append(copy.deepcopy(output.cpu().detach().numpy()))
+
         
             
         # 注册钩子函数
