@@ -2782,7 +2782,7 @@ class Trainer:
         
         intermediate_outputs = []
         
-        def print_intermediate_output(module, inputs, outputs):
+        def print_intermediate_output(model, inputs, outputs):
             intermediate_outputs.append(outputs)
         
             
