@@ -34,8 +34,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from tqdm.auto import tqdm
-from torch.nn import Module
-from transformers import Model
+
 
 
 # Integrations must be imported before ML frameworks:
@@ -2786,45 +2785,39 @@ class Trainer:
         
         intermediate_outputs = []
 
-        class CustomModel(Model):
-            def __init__(self, config):
-                super().__init__(config)
-                self.intermediate_outputs = []
+        
 
-            def forward(self, **kwargs):
-                outputs = super().forward(**kwargs)
-                self.intermediate_outputs.append(outputs)
-                return outputs
-
-        model = CustomModel(config)
+        def print_intermediate_output(module, input, output):
+            intermediate_outputs.append(output)
 
         # 注册钩子函数
-        hook_handle = model.register_forward_hook(print_intermediate_output)
+        hook_handles = []
+        for module in model.modules():
+            hook_handles.append(module.register_forward_hook(print_intermediate_output))
 
         print("\033[1;31mMemory occupied before output:\033[0m:")
-        print(get_memory())    
-        print(get_gpu_memory_usage())  
+        print(get_memory())
+        print(get_gpu_memory_usage())
 
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
         else:
             labels = None
-
         outputs = model(**inputs)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
-        print(get_gpu_memory_usage())  
+        print(get_gpu_memory_usage())
 
         print(model.forward.__code__.co_varnames)
 
-        for i, intermediate_output in enumerate(model.intermediate_outputs):
+        for i, intermediate_output in enumerate(intermediate_outputs):
             print("Output of layer", i)
-            logits = intermediate_output.logits
-            print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
-        
+            print(intermediate_output)
+
         # 注销钩子函数
-        hook_handle.remove()
+        for handle in hook_handles:
+            handle.remove()
         
         # Save past state if it exists
         # TODO: this needs to be fixed and made cleaner later.
