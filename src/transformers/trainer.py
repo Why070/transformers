@@ -2813,8 +2813,8 @@ class Trainer:
 
         for i, intermediate_output in enumerate(intermediate_outputs):
             print("Output of layer", i)
-            logits=intermediate_output.logit
-            print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
+            logit=intermediate_output.logits
+            print("logits.size:", logit.size(), "logits.dtype:", logit.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
