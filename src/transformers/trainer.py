@@ -2812,7 +2812,9 @@ class Trainer:
         print(model.forward.__code__.co_varnames)
 
         for intermediate_output in intermediate_outputs:
-            print("Output size:", intermediate_output.size(), "Output dtype:", intermediate_output.dtype)
+            print(intermediate_output)
+            logits = intermediate_output.logits
+            print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
