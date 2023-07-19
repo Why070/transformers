@@ -2801,8 +2801,7 @@ class Trainer:
                
         else:
             labels = None
-        
-         outputs = model(**inputs)
+        outputs = model(**inputs)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
