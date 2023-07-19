@@ -28,6 +28,7 @@ import shutil
 import sys
 import time
 import warnings
+import copy
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
