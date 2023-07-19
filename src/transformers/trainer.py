@@ -2784,7 +2784,7 @@ class Trainer:
         
         intermediate_outputs = []
         
-       def print_intermediate_output(module, input, output):
+        def print_intermediate_output(module, input, output):
             intermediate_outputs.append(copy.deepcopy(output.cpu().detach().numpy()))
 
         
