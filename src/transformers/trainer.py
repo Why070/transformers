@@ -2813,7 +2813,7 @@ class Trainer:
 
         for i, intermediate_output in enumerate(intermediate_outputs):
             print("Output of layer", i)
-            logits=intermediate_output.logits
+            logits=intermediate_output.logit
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
 
         # 注销钩子函数
