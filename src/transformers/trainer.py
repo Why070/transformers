@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from tqdm.auto import tqdm
 from torch.nn import Module
+from transformers import Model
 
 
 # Integrations must be imported before ML frameworks:
