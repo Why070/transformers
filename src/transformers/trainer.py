@@ -2811,10 +2811,8 @@ class Trainer:
 
         print(model.forward.__code__.co_varnames)
 
-        for i, outputs in enumerate(intermediate_outputs):
-            print("Output of layer", i)
-            logit=outputs.logits
-            print("logits.size:", logit.size(), "logits.dtype:", logit.dtype)
+        for intermediate_output in enumerate(intermediate_outputs):
+            print("Output size:", intermediate_output.size(), "Output dtype:", intermediate_output.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
