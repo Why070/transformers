@@ -34,6 +34,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 from tqdm.auto import tqdm
+from torch.nn import Module
 
 
 # Integrations must be imported before ML frameworks:
@@ -2783,27 +2784,31 @@ class Trainer:
             return result.stdout
         
         intermediate_outputs = []
-        
-        def print_intermediate_output(module, input, output):
-            intermediate_outputs.append(type(output)(**output.__dict__))
 
-        
-            
+        class CustomModel(Model):
+            def __init__(self, config):
+                super().__init__(config)
+                self.intermediate_outputs = []
+
+            def forward(self, **kwargs):
+                outputs = super().forward(**kwargs)
+                self.intermediate_outputs.append(outputs)
+                return outputs
+
+        model = CustomModel(config)
+
         # 注册钩子函数
         hook_handle = model.register_forward_hook(print_intermediate_output)
 
-        
         print("\033[1;31mMemory occupied before output:\033[0m:")
         print(get_memory())    
         print(get_gpu_memory_usage())  
 
-        
-        
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
-               
         else:
             labels = None
+
         outputs = model(**inputs)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
@@ -2811,14 +2816,12 @@ class Trainer:
         print(get_gpu_memory_usage())  
 
         print(model.forward.__code__.co_varnames)
-        
-        
-            
-        for i, intermediate_output in enumerate(intermediate_outputs):
+
+        for i, intermediate_output in enumerate(model.intermediate_outputs):
             print("Output of layer", i)
             logits = intermediate_output.logits
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
-
+        
         # 注销钩子函数
         hook_handle.remove()
         
