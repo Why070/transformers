@@ -2802,7 +2802,8 @@ class Trainer:
         else:
             labels = None
         
-        outputs = model(**inputs)
+        for single_input in inputs.values():
+            outputs = model(single_input)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
