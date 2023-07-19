@@ -2783,7 +2783,7 @@ class Trainer:
         intermediate_outputs = []
         
         def print_intermediate_output(module, input, output):
-            intermediate_outputs.append(output.clone())
+            intermediate_outputs.append(copy.deepcopy(output))
         
             
         # 注册钩子函数
