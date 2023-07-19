@@ -2783,7 +2783,7 @@ class Trainer:
         intermediate_outputs = []
         
         def print_intermediate_output(module, input, output):
-            intermediate_outputs.append(output)
+            intermediate_outputs.append(output.clone())
         
             
         # 注册钩子函数
@@ -2811,9 +2811,9 @@ class Trainer:
         
         
             
-        for intermediate_output in intermediate_outputs:
-            print(intermediate_output)
-            logits = outputs.logits
+        for i, intermediate_output in enumerate(intermediate_outputs):
+            print("Output of layer", i)
+            logits = intermediate_output.logits
             print("logits.size:", logits.size(), "logits.dtype:", logits.dtype)
 
         # 注销钩子函数
