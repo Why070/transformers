@@ -2810,7 +2810,7 @@ class Trainer:
         print(get_gpu_memory_usage())
 
         for intermediate_output in intermediate_outputs:
-            print(intermediate_output)
+            print("Output size:", intermediate_output.shape , "Output dtype:", intermediate_output.dtype)
             
 
         # 注销钩子函数
