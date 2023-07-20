@@ -2796,7 +2796,7 @@ class Trainer:
                 else:
                     if output is not None:
                         intermediate_outputs.append((output, module_name))
-                return print_intermediate_output
+            return print_intermediate_output
 
         # 注册钩子函数
         hook_handles = []
