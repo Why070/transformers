@@ -2789,9 +2789,14 @@ class Trainer:
 
         def create_hook_fn(module_name):
             def print_intermediate_output(module, input, output):
-                if output is not None:
-                    intermediate_outputs.append((output, module_name))
-            return print_intermediate_output
+                if isinstance(output, tuple):
+                    for tensor in output:
+                        if tensor is not None:
+                            intermediate_outputs.append((tensor, module_name))
+                else:
+                    if output is not None:
+                        intermediate_outputs.append((output, module_name))
+                return print_intermediate_output
 
         # 注册钩子函数
         hook_handles = []
