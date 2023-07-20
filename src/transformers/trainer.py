@@ -2787,14 +2787,16 @@ class Trainer:
 
         
 
-        def print_intermediate_output(module, input, output, module_name):
-            intermediate_outputs.append((output, module_name))
+        def create_hook_fn(module_name):
+            def print_intermediate_output(module, input, output):
+                intermediate_outputs.append((output, module_name))
+            return print_intermediate_output
 
         # 注册钩子函数
         hook_handles = []
         for module_name, module in model.named_modules():
-            hook_handles.append(module.register_forward_hook(
-                print_intermediate_output))
+            hook_fn = create_hook_fn(module_name)
+            hook_handles.append(module.register_forward_hook(hook_fn))
 
         print("\033[1;31mMemory occupied before output:\033[0m:")
         print(get_memory())
