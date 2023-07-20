@@ -2794,7 +2794,7 @@ class Trainer:
         hook_handles = []
         for module_name, module in model.named_modules():
             hook_handles.append(module.register_forward_hook(
-                partial(print_intermediate_output, module_name=module_name)))
+                print_intermediate_output))
 
         print("\033[1;31mMemory occupied before output:\033[0m:")
         print(get_memory())
