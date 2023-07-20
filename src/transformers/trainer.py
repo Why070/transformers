@@ -2789,7 +2789,8 @@ class Trainer:
 
         def create_hook_fn(module_name):
             def print_intermediate_output(module, input, output):
-                intermediate_outputs.append((output, module_name))
+                if output is not None:
+                    intermediate_outputs.append((output, module_name))
             return print_intermediate_output
 
         # 注册钩子函数
