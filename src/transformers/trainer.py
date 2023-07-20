@@ -2809,14 +2809,16 @@ class Trainer:
         print(get_memory())
         print(get_gpu_memory_usage())
 
-        for intermediate_output in intermediate_outputs:
-            print("Output size:", intermediate_output.shape , "Output dtype:", intermediate_output.dtype)
-            
+        for intermediate_output, module_name in intermediate_outputs:
+            if isinstance(intermediate_output, tuple):
+                for idx, tensor in enumerate(intermediate_output):
+                    print(f"模块 '{module_name}' 输出 {idx} 大小:", tensor.shape, "输出数据类型:", tensor.dtype)
+            else:
+                print("模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
             handle.remove()
-        
         # Save past state if it exists
         # TODO: this needs to be fixed and made cleaner later.
  
