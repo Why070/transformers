@@ -2818,8 +2818,13 @@ class Trainer:
         print(get_memory())
         print(get_gpu_memory_usage())
 
+        
         for intermediate_output, module_name in intermediate_outputs:
-            print(f"模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
+            if isinstance(intermediate_output, torch.Tensor):  # 检查是否是张量
+                print(f"模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
+            else:
+                logits = intermediate_output.logits
+                print(f"模块 '{module_name}' 输出大小:", logits.shape, "输出数据类型:", logits.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
