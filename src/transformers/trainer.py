@@ -2823,7 +2823,12 @@ class Trainer:
             if isinstance(intermediate_output, torch.Tensor):  # 检查是否是张量
                 print(f"模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
             else:
-                print(intermediate_output)
+                if hasattr(intermediate_output, 'last_hidden_state'):  # Check for the 'last_hidden_state' attribute
+                    last_hidden_state = intermediate_output.last_hidden_state
+                    print(f"模块 '{module_name}' 中间输出 last_hidden_state 大小:", last_hidden_state.shape, "输出数据类型:", last_hidden_state.dtype)
+                if hasattr(intermediate_output, 'logits'):  # Check for the 'logits' attribute
+                    logits = intermediate_output.logits
+                    print(f"模块 '{module_name}' 中间输出 logits 大小:", logits.shape, "输出数据类型:", logits.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
