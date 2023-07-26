@@ -1928,8 +1928,11 @@ class Trainer:
                         scale_after = self.scaler.get_scale()
                         optimizer_was_run = scale_before <= scale_after
                     else:
-                        
+                        print("\033[1;31mMemory occupied before optimizer:\033[0m:")
+                        print(get_memory())
                         self.optimizer.step()
+                        print("\033[1;31mMemory occupied after optimizer:\033[0m:")
+                        print(get_memory())
                         
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
