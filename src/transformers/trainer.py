@@ -2824,10 +2824,7 @@ class Trainer:
 
         
         for intermediate_output, module_name in intermediate_outputs:
-            if isinstance(intermediate_output, torch.Tensor):  # 检查是否是张量
-                print(f"模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
-            else:
-                print(intermediate_output)
+            print(intermediate_output)
 
         # 注销钩子函数
         for handle in hook_handles:
