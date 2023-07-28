@@ -2792,7 +2792,6 @@ class Trainer:
 
         def create_hook_fn(module_name):
             def print_intermediate_output(module, input, output):
-                print(f"Type of output for module '{module_name}': {type(output)}")
                 if isinstance(output, tuple):
                     for tensor in output:
                         if tensor is not None:
@@ -2816,7 +2815,7 @@ class Trainer:
             labels = inputs.pop("labels")
         else:
             labels = None
-        outputs = model.forward(input)
+        outputs = model.(**input)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
@@ -2824,7 +2823,15 @@ class Trainer:
 
         
         for intermediate_output, module_name in intermediate_outputs:
-            print(intermediate_output)
+            if isinstance(intermediate_output, torch.Tensor):  
+                print(f"模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
+            else:
+                if hasattr(intermediate_output, 'last_hidden_state'):  
+                    last_hidden_state = intermediate_output.last_hidden_state
+                    print(f"模块 '{module_name}' 中间输出 last_hidden_state 大小:", last_hidden_state.shape, "输出数据类型:", last_hidden_state.dtype)
+                if hasattr(intermediate_output, 'logits'):  
+                    logits = intermediate_output.logits
+                    print(f"模块 '{module_name}' 中间输出 logits 大小:", logits.shape, "输出数据类型:", logits.dtype)
 
         # 注销钩子函数
         for handle in hook_handles:
