@@ -2792,6 +2792,7 @@ class Trainer:
 
         def create_hook_fn(module_name):
             def print_intermediate_output(module, input, output):
+                print(f"Type of output for module '{module_name}': {type(output)}")
                 if isinstance(output, tuple):
                     for tensor in output:
                         if tensor is not None:
