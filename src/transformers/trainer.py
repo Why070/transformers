@@ -2815,7 +2815,7 @@ class Trainer:
             labels = inputs.pop("labels")
         else:
             labels = None
-        outputs = model(**inputs)
+        outputs = model.forward(**input)
 
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
