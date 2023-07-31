@@ -2791,7 +2791,7 @@ class Trainer:
         def create_hook_fn(module_name):
             def print_intermediate_output(module, input, output):
                 if isinstance(output, tuple):
-                    for tensor in output:
+                    for i, tensor in enumerate(output):
                         if tensor is not None:
                             intermediate_outputs.append((tensor, module_name))
                         else:
