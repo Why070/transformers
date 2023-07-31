@@ -2794,6 +2794,8 @@ class Trainer:
                     for tensor in output:
                         if tensor is not None:
                             intermediate_outputs.append((tensor, module_name))
+                        else:
+                            print(f"模块 '{module_name}' 的第 {i} 个输出为 None")
                 else:
                     if output is not None:
                         intermediate_outputs.append((output, module_name))
