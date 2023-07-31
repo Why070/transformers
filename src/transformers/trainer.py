@@ -2794,13 +2794,9 @@ class Trainer:
                     for i, tensor in enumerate(output):
                         if tensor is not None:
                             intermediate_outputs.append((tensor, module_name))
-                        else:
-                            print(f"模块 '{module_name}' 的第 {i} 个输出为 None")
                 else:
                     if output is not None:
                         intermediate_outputs.append((output, module_name))
-                    else:
-                        print(f"模块 '{module_name}' 的输出为 None")
             return print_intermediate_output
 
         # 注册钩子函数
@@ -2835,6 +2831,8 @@ class Trainer:
                 if hasattr(intermediate_output, 'logits'):  
                     logits = intermediate_output.logits
                     print(f"模块 '{module_name}' 中间输出 logits 大小:", logits.shape, "输出数据类型:", logits.dtype)
+                else: print(intermediate_output)
+            
 
         # 注销钩子函数
         for handle in hook_handles:
