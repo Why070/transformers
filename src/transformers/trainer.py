@@ -2804,7 +2804,6 @@ class Trainer:
         for module_name, module in model.named_modules():
             hook_fn = create_hook_fn(module_name)
             hook_handles.append(module.register_forward_hook(hook_fn))
-            hook_handles.append(hook_handle)
             print(f"钩子函数已注册到模块 '{module_name}'")
 
         print("\033[1;31mMemory occupied before output:\033[0m:")
