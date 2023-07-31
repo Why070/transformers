@@ -2799,6 +2799,8 @@ class Trainer:
                 else:
                     if output is not None:
                         intermediate_outputs.append((output, module_name))
+                    else:
+                        print(f"模块 '{module_name}' 的输出为 None")
             return print_intermediate_output
 
         # 注册钩子函数
