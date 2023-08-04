@@ -30,6 +30,7 @@ import time
 import warnings
 import copy
 import numpy as np
+import argparse
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
@@ -1640,7 +1641,19 @@ class Trainer:
         # Activate gradient checkpointing if needed
         if args.gradient_checkpointing:
             self.model.gradient_checkpointing_enable()
+        
+        
 
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--gradient_checkpointing", action="store_true", help="Enable gradient checkpointing")
+        args = parser.parse_args()
+
+        # 获取args.gradient_checkpointing的值
+        gradient_checkpointing_enabled = args.gradient_checkpointing
+
+        # 打印参数值
+        print("\033[1;31mGradient Checkpointing Enabled:\033[0m", gradient_checkpointing_enabled)
+        
         model = self._wrap_model(self.model_wrapped)
 
         if is_sagemaker_mp_enabled() and resume_from_checkpoint is not None:
@@ -1903,11 +1916,7 @@ class Trainer:
                         return str(torch.cuda.memory_summary())  
                     
 
-                    print("\033[1;31mMemory occupied before 梯度更新:\033[0m:")
-                    print(get_gpu_memory_usage())
-
-                    print("\033[1;31mMemory occupied before 梯度更新:\033[0m:")
-                    print(get_memory())
+                    
                     
                     if is_torch_tpu_available():
                         if self.do_grad_scaling:
@@ -1930,17 +1939,17 @@ class Trainer:
                     else:
                         print("\033[1;31mMemory occupied before optimizer:\033[0m:")
                         print(get_memory())
+                        print("\033[1;31mMemory occupied before optimizer:\033[0m:")
+                        print(get_gpu_memory_usage())
                         self.optimizer.step()
                         print("\033[1;31mMemory occupied after optimizer:\033[0m:")
                         print(get_memory())
+                        print("\033[1;31mMemory occupied after optimizer:\033[0m:")
+                        print(get_gpu_memory_usage())
                         
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
-                    print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
-                    print(get_gpu_memory_usage())
-
-                    print("\033[1;31mMemory occupied after 梯度更新:\033[0m:")
-                    print(get_memory())
+                   
 
                     if optimizer_was_run:
                         # Delay optimizer scheduling until metrics are generated
@@ -2725,13 +2734,7 @@ class Trainer:
             result = subprocess.run(['nvidia-smi', '-i', '0', '-q', '-d', 'MEMORY'], capture_output=True, text=True)
             return result.stdout
                
-                
-
-        print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
-        print(get_gpu_memory_usage())
-
-        print("\033[1;31mMemory occupied before 梯度累计:\033[0m:")
-        print(get_memory())
+            
                             
                 
         
@@ -2743,9 +2746,7 @@ class Trainer:
         with self.compute_loss_context_manager():
             loss = self.compute_loss(model, inputs)
 
-        print("\033[1;31mMemory occupied after compute loss:\033[0m:")
-        print(get_memory())
-
+       
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
 
@@ -2761,14 +2762,6 @@ class Trainer:
             self.accelerator.backward(loss)
     
 
-        print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
-        print(get_gpu_memory_usage())
-        print("\033[1;31mMemory occupied after 梯度累计:\033[0m:")
-        print(get_memory())
-        
-        max_memory_reserved = torch.cuda.max_memory_reserved()
-        max_memory_reserved_mb = max_memory_reserved / 1024**2
-        print(f"\033[1;31mMax Memory Reserved: {max_memory_reserved_mb:.2f} MB\033[0m:")
 
 
         return loss.detach() / self.args.gradient_accumulation_steps
