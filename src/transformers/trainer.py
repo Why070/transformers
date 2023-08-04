@@ -1639,9 +1639,10 @@ class Trainer:
         self.state.is_hyper_param_search = trial is not None
 
         # Activate gradient checkpointing if needed
+        print("\033[1;31mgradient_checkpointing is:\033[0m", args.gradient_checkpointing)
         if args.gradient_checkpointing:
             self.model.gradient_checkpointing_enable()
-
+        
         
         model = self._wrap_model(self.model_wrapped)
 
