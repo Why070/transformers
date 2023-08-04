@@ -1641,18 +1641,9 @@ class Trainer:
         # Activate gradient checkpointing if needed
         if args.gradient_checkpointing:
             self.model.gradient_checkpointing_enable()
-        
-        
-
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--gradient_checkpointing", action="store_true", help="Enable gradient checkpointing")
-        args = parser.parse_args()
-
-        # 获取args.gradient_checkpointing的值
-        gradient_checkpointing_enabled = args.gradient_checkpointing
 
         # 打印参数值
-        print("\033[1;31mGradient Checkpointing Enabled:\033[0m", gradient_checkpointing_enabled)
+        print("\033[1;31mgradient_checkpointing is:\033[0m", gradient_checkpointing)
         
         model = self._wrap_model(self.model_wrapped)
 
