@@ -1642,8 +1642,6 @@ class Trainer:
         if args.gradient_checkpointing:
             self.model.gradient_checkpointing_enable()
 
-        # 打印参数值
-        print("\033[1;31mgradient_checkpointing is:\033[0m", gradient_checkpointing)
         
         model = self._wrap_model(self.model_wrapped)
 
