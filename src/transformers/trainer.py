@@ -2798,6 +2798,8 @@ class Trainer:
         print(get_memory())
         print(get_memory_stats())
 
+        print("输入数据类型:", inputs.dtype , "输入形状:", inputs.shape)
+        
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
         else:
