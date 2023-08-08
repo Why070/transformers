@@ -2798,10 +2798,6 @@ class Trainer:
         print(get_memory())
         print(get_memory_stats())
 
-        for key, value in inputs.items():
-            if isinstance(value, torch.Tensor):
-                print(f"输入 '{key}' 数据类型:", value.dtype)
-                print(f"输入 '{key}' 形状:", value.shape)
         
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
