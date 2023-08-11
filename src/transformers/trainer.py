@@ -2729,6 +2729,7 @@ class Trainer:
                 
         
         if is_sagemaker_mp_enabled():
+            print("loss mbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
             return loss_mb.reduce_mean().detach().to(self.args.device)
 
