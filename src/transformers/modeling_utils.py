@@ -3464,6 +3464,9 @@ class PoolerStartLogits(nn.Module):
     def __init__(self, config: PretrainedConfig):
         super().__init__()
         self.dense = nn.Linear(config.hidden_size, 1)
+    
+    def get_memory():
+            return torch.cuda.memory_allocated()/1024/1024
 
     def forward(
         self, hidden_states: torch.FloatTensor, p_mask: Optional[torch.FloatTensor] = None
@@ -3479,6 +3482,9 @@ class PoolerStartLogits(nn.Module):
         Returns:
             `torch.FloatTensor`: The start logits for SQuAD.
         """
+
+        print("\033[1;31mMemory occupied before trans forward:\033[0m:")
+        print(get_memory())
         x = self.dense(hidden_states).squeeze(-1)
 
         if p_mask is not None:
@@ -3486,6 +3492,8 @@ class PoolerStartLogits(nn.Module):
                 x = x * (1 - p_mask) - 65500 * p_mask
             else:
                 x = x * (1 - p_mask) - 1e30 * p_mask
+        print("\033[1;31mMemory occupied after trans forward:\033[0m:")
+        print(get_memory())
 
         return x
 
