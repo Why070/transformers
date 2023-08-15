@@ -69,9 +69,18 @@ class ParameterProjection(nn.Module):
         self.proj = nn.ModuleList([nn.Linear(in_features, dim) for dim in args_dim.values()])
         self.domain_map = domain_map
 
+    def get_memory():
+            return torch.cuda.memory_allocated()/1024/1024
+    
+    
+    
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor]:
+        print("\033[1;31mMemory occupied before para forward:\033[0m:")
+        print(get_memory())
         params_unbounded = [proj(x) for proj in self.proj]
-
+    
+        print("\033[1;31mMemory occupied after para forward:\033[0m:")
+        print(get_memory())
         return self.domain_map(*params_unbounded)
 
 
@@ -79,9 +88,18 @@ class LambdaLayer(nn.Module):
     def __init__(self, function):
         super().__init__()
         self.function = function
-
+    
+    def get_memory():
+            return torch.cuda.memory_allocated()/1024/1024
+    
     def forward(self, x, *args):
+        print("\033[1;31mMemory occupied before lambda forward:\033[0m:")
+        print(get_memory())
         return self.function(x, *args)
+    
+    print("\033[1;31mMemory occupied after lambda forward:\033[0m:")
+    print(get_memory())
+        
 
 
 class DistributionOutput:
