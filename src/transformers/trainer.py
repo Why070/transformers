@@ -2798,14 +2798,18 @@ class Trainer:
         print("\033[1;31mMemory occupied before output:\033[0m:")
         print(get_memory())
         print(get_memory_stats())
-
+        
+        model.add_memory_hooks()
         
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
         else:
             labels = None
         outputs = model(**inputs)
-
+        for module in model.modules():
+            if hasattr(module, "mem_rss_diff"):
+                print(f"Module: {module.__class__.__name__}, Memory Diff: {module.mem_rss_diff}")
+        
         print("\033[1;31mMemory occupied after output:\033[0m:")
         print(get_memory())
         print(get_memory_stats())
