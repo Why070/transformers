@@ -100,9 +100,15 @@ class Conv1D(nn.Module):
         nn.init.normal_(self.weight, std=0.02)
 
     def forward(self, x):
+        def get_memory():
+            return torch.cuda.memory_allocated()/1024/1024
+        print("\033[1;31mMemory occupied before conv forward:\033[0m:")
+        print(get_memory())
         size_out = x.size()[:-1] + (self.nf,)
         x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
         x = x.view(size_out)
+        print("\033[1;31mMemory occupied after conv forward:\033[0m:")
+        print(get_memory())
         return x
 
 
