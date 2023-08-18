@@ -2799,7 +2799,7 @@ class Trainer:
         print(get_memory())
         print(get_memory_stats())
         
-        model.add_memory_hooks()
+        
         
         if self.label_smoother is not None and "labels" in inputs:
             labels = inputs.pop("labels")
