@@ -70,6 +70,8 @@ def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] 
 
     return inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
 
+def get_memory():
+    return torch.cuda.memory_allocated()/1024/1024
 
 class LlamaRMSNorm(nn.Module):
     def __init__(self, hidden_size, eps=1e-6):
@@ -81,10 +83,17 @@ class LlamaRMSNorm(nn.Module):
         self.variance_epsilon = eps
 
     def forward(self, hidden_states):
+        print("\033[1;31mMemory occupied before LlamaRMSNorm forward:\033[0m:")
+        print(get_memory())
         input_dtype = hidden_states.dtype
         variance = hidden_states.to(torch.float32).pow(2).mean(-1, keepdim=True)
+        print("\033[1;31mMemory occupied after LlamaRMSNorm variance:\033[0m:")
+        print(get_memory())
+        print("Variance tensor shape:", variance.shape, "Variance tensor type:", variance.dtype)
         hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
-
+        print("\033[1;31mMemory occupied after LlamaRMSNorm hidden_states:\033[0m:")
+        print(get_memory())
+        print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype)
         return (self.weight * hidden_states).to(input_dtype)
 
 
@@ -107,17 +116,27 @@ class LlamaRotaryEmbedding(torch.nn.Module):
     def forward(self, x, seq_len=None):
         # x: [bs, num_attention_heads, seq_len, head_size]
         # This `if` block is unlikely to be run after we build sin/cos in `__init__`. Keep the logic here just in case.
+        print("\033[1;31mMemory occupied before LlamaRotaryEmbedding:\033[0m:")
+        print(get_memory())
         if seq_len > self.max_seq_len_cached:
             self.max_seq_len_cached = seq_len
             t = torch.arange(self.max_seq_len_cached, device=x.device, dtype=self.inv_freq.dtype)
+            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding t:\033[0m:")
+            print(get_memory())
             freqs = torch.einsum("i,j->ij", t, self.inv_freq)
+            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding freqs:\033[0m:")
+            print(get_memory())
             # Different from paper, but it uses a different permutation in order to obtain the same calculation
             emb = torch.cat((freqs, freqs), dim=-1).to(x.device)
+            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding emb:\033[0m:")
+            print(get_memory())
             self.register_buffer("cos_cached", emb.cos()[None, None, :, :].to(x.dtype), persistent=False)
             self.register_buffer("sin_cached", emb.sin()[None, None, :, :].to(x.dtype), persistent=False)
         return (
             self.cos_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
             self.sin_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
+            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding cos_cached,sin_cached:\033[0m:")
+            print(get_memory())
         )
 
 
@@ -146,14 +165,20 @@ class LlamaMLP(nn.Module):
         intermediate_size: int,
         hidden_act: str,
     ):
+        print("\033[1;31mMemory occupied before LlamaMLP:\033[0m:")
+        print(get_memory())
         super().__init__()
         self.gate_proj = nn.Linear(hidden_size, intermediate_size, bias=False)
         self.down_proj = nn.Linear(intermediate_size, hidden_size, bias=False)
         self.up_proj = nn.Linear(hidden_size, intermediate_size, bias=False)
         self.act_fn = ACT2FN[hidden_act]
+        print("\033[1;31mMemory occupied after LlamaMLP gate,down,up:\033[0m:")
+        print(get_memory())
 
     def forward(self, x):
         return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+        print("\033[1;31mMemory occupied after LlamaMLP return outcome:\033[0m:")
+        print(get_memory())
 
 
 class LlamaAttention(nn.Module):
@@ -161,12 +186,14 @@ class LlamaAttention(nn.Module):
 
     def __init__(self, config: LlamaConfig):
         super().__init__()
+        print("\033[1;31mMemory occupied before LlamaAttention:\033[0m:")
+        print(get_memory())
         self.config = config
         self.hidden_size = config.hidden_size
         self.num_heads = config.num_attention_heads
         self.head_dim = self.hidden_size // self.num_heads
         self.max_position_embeddings = config.max_position_embeddings
-
+        
         if (self.head_dim * self.num_heads) != self.hidden_size:
             raise ValueError(
                 f"hidden_size must be divisible by num_heads (got `hidden_size`: {self.hidden_size}"
@@ -177,6 +204,8 @@ class LlamaAttention(nn.Module):
         self.v_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=False)
         self.rotary_emb = LlamaRotaryEmbedding(self.head_dim, max_position_embeddings=self.max_position_embeddings)
+        print("\033[1;31mMemory occupied after LlamaAttention q k v o emb :\033[0m:")
+        print(get_memory())
 
     def _shape(self, tensor: torch.Tensor, seq_len: int, bsz: int):
         return tensor.view(bsz, seq_len, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
@@ -191,15 +220,24 @@ class LlamaAttention(nn.Module):
         use_cache: bool = False,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
         bsz, q_len, _ = hidden_states.size()
-
+        print("\033[1;31mMemory occupied before LlamaAttention  query_states:\033[0m:")
+        print(get_memory())
         query_states = self.q_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        print("\033[1;31mMemory occupied after LlamaAttention  query_states:\033[0m:")
+        print(get_memory())
         key_states = self.k_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        print("\033[1;31mMemory occupied after LlamaAttention key_states:\033[0m:")
+        print(get_memory())
         value_states = self.v_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        print("\033[1;31mMemory occupied after LlamaAttention value_states:\033[0m:")
+        print(get_memory())
 
         kv_seq_len = key_states.shape[-2]
         if past_key_value is not None:
             kv_seq_len += past_key_value[0].shape[-2]
         cos, sin = self.rotary_emb(value_states, seq_len=kv_seq_len)
+        print("\033[1;31mMemory occupied after LlamaAttention cos sin:\033[0m:")
+        print(get_memory())
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin, position_ids)
         # [bsz, nh, t, hd]
 
@@ -211,7 +249,8 @@ class LlamaAttention(nn.Module):
         past_key_value = (key_states, value_states) if use_cache else None
 
         attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
-
+        print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
+        print(get_memory())
         if attn_weights.size() != (bsz, self.num_heads, q_len, kv_seq_len):
             raise ValueError(
                 f"Attention weights should be of size {(bsz, self.num_heads, q_len, kv_seq_len)}, but is"
@@ -230,7 +269,11 @@ class LlamaAttention(nn.Module):
 
         # upcast attention to fp32
         attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+        print("\033[1;31mMemory occupied after LlamaAttention attn_weights2:\033[0m:")
+        print(get_memory())
         attn_output = torch.matmul(attn_weights, value_states)
+        print("\033[1;31mMemory occupied after LlamaAttention attn_out1:\033[0m:")
+        print(get_memory())
 
         if attn_output.size() != (bsz, self.num_heads, q_len, self.head_dim):
             raise ValueError(
@@ -245,7 +288,8 @@ class LlamaAttention(nn.Module):
 
         if not output_attentions:
             attn_weights = None
-
+        print("\033[1;31mMemory occupied after LlamaAttention attn_out2:\033[0m:")
+        print(get_memory())
         return attn_output, attn_weights, past_key_value
 
 
@@ -284,11 +328,14 @@ class LlamaDecoderLayer(nn.Module):
                 (see `past_key_values`).
             past_key_value (`Tuple(torch.FloatTensor)`, *optional*): cached past key and value projection states
         """
-
+        print("\033[1;31mMemory occupied before LlamaDecoderLayer:\033[0m:")
+        print(get_memory())
         residual = hidden_states
-
+        print("\033[1;31mMemory occupied after LlamaDecoderLayer residual:\033[0m:")
+        print(get_memory())
         hidden_states = self.input_layernorm(hidden_states)
-
+        print("\033[1;31mMemory occupied after LlamaDecoderLayer hidden_states:\033[0m:")
+        print(get_memory())
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
             hidden_states=hidden_states,
@@ -305,9 +352,11 @@ class LlamaDecoderLayer(nn.Module):
         hidden_states = self.post_attention_layernorm(hidden_states)
         hidden_states = self.mlp(hidden_states)
         hidden_states = residual + hidden_states
-
+        print("\033[1;31mMemory occupied after LlamaDecoderLayer 3个hidden_states:\033[0m:")
+        print(get_memory())
         outputs = (hidden_states,)
-
+        print("\033[1;31mMemory occupied after LlamaDecoderLayer outputs:\033[0m:")
+        print(get_memory())
         if output_attentions:
             outputs += (self_attn_weights,)
 
