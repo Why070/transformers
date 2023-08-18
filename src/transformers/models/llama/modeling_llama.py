@@ -95,6 +95,8 @@ class LlamaRMSNorm(nn.Module):
         print(get_memory())
         print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype)
         return (self.weight * hidden_states).to(input_dtype)
+        print("\033[1;31mMemory occupied after LlamaRMSNorm return:\033[0m:")
+        print(get_memory())
 
 
 class LlamaRotaryEmbedding(torch.nn.Module):
@@ -165,19 +167,17 @@ class LlamaMLP(nn.Module):
         intermediate_size: int,
         hidden_act: str,
     ):
-        print("\033[1;31mMemory occupied before LlamaMLP:\033[0m:")
-        print(get_memory())
+        
         super().__init__()
         self.gate_proj = nn.Linear(hidden_size, intermediate_size, bias=False)
         self.down_proj = nn.Linear(intermediate_size, hidden_size, bias=False)
         self.up_proj = nn.Linear(hidden_size, intermediate_size, bias=False)
         self.act_fn = ACT2FN[hidden_act]
-        print("\033[1;31mMemory occupied after LlamaMLP gate,down,up:\033[0m:")
-        print(get_memory())
+        
 
     def forward(self, x):
         return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
-        print("\033[1;31mMemory occupied after LlamaMLP return outcome:\033[0m:")
+        print("\033[1;31mMemory occupied after LlamaMLP :\033[0m:")
         print(get_memory())
 
 
@@ -186,8 +186,7 @@ class LlamaAttention(nn.Module):
 
     def __init__(self, config: LlamaConfig):
         super().__init__()
-        print("\033[1;31mMemory occupied before LlamaAttention:\033[0m:")
-        print(get_memory())
+        
         self.config = config
         self.hidden_size = config.hidden_size
         self.num_heads = config.num_attention_heads
@@ -204,8 +203,7 @@ class LlamaAttention(nn.Module):
         self.v_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=False)
         self.rotary_emb = LlamaRotaryEmbedding(self.head_dim, max_position_embeddings=self.max_position_embeddings)
-        print("\033[1;31mMemory occupied after LlamaAttention q k v o emb :\033[0m:")
-        print(get_memory())
+        
 
     def _shape(self, tensor: torch.Tensor, seq_len: int, bsz: int):
         return tensor.view(bsz, seq_len, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
@@ -236,8 +234,7 @@ class LlamaAttention(nn.Module):
         if past_key_value is not None:
             kv_seq_len += past_key_value[0].shape[-2]
         cos, sin = self.rotary_emb(value_states, seq_len=kv_seq_len)
-        print("\033[1;31mMemory occupied after LlamaAttention cos sin:\033[0m:")
-        print(get_memory())
+        
         query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin, position_ids)
         # [bsz, nh, t, hd]
 
@@ -272,7 +269,7 @@ class LlamaAttention(nn.Module):
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights2:\033[0m:")
         print(get_memory())
         attn_output = torch.matmul(attn_weights, value_states)
-        print("\033[1;31mMemory occupied after LlamaAttention attn_out1:\033[0m:")
+        print("\033[1;31mMemory occupied after LlamaAttention attn_output:\033[0m:")
         print(get_memory())
 
         if attn_output.size() != (bsz, self.num_heads, q_len, self.head_dim):
@@ -288,8 +285,7 @@ class LlamaAttention(nn.Module):
 
         if not output_attentions:
             attn_weights = None
-        print("\033[1;31mMemory occupied after LlamaAttention attn_out2:\033[0m:")
-        print(get_memory())
+        
         return attn_output, attn_weights, past_key_value
 
 
@@ -331,8 +327,7 @@ class LlamaDecoderLayer(nn.Module):
         print("\033[1;31mMemory occupied before LlamaDecoderLayer:\033[0m:")
         print(get_memory())
         residual = hidden_states
-        print("\033[1;31mMemory occupied after LlamaDecoderLayer residual:\033[0m:")
-        print(get_memory())
+        
         hidden_states = self.input_layernorm(hidden_states)
         print("\033[1;31mMemory occupied after LlamaDecoderLayer hidden_states:\033[0m:")
         print(get_memory())
@@ -351,12 +346,12 @@ class LlamaDecoderLayer(nn.Module):
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
         hidden_states = self.mlp(hidden_states)
+        print("\033[1;31mMemory occupied after LlamaMLP :\033[0m:")
+        print(get_memory())
         hidden_states = residual + hidden_states
-        print("\033[1;31mMemory occupied after LlamaDecoderLayer 3个hidden_states:\033[0m:")
-        print(get_memory())
+        
         outputs = (hidden_states,)
-        print("\033[1;31mMemory occupied after LlamaDecoderLayer outputs:\033[0m:")
-        print(get_memory())
+        
         if output_attentions:
             outputs += (self_attn_weights,)
 
