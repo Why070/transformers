@@ -135,9 +135,9 @@ class LlamaRotaryEmbedding(torch.nn.Module):
         return (
             self.cos_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
             self.sin_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
-            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding cos_cached,sin_cached:\033[0m:")
-            print(get_memory())
-        )
+            )
+        print("\033[1;31mMemory occupied after LlamaRotaryEmbedding cos_cached,sin_cached:\033[0m:")
+        print(get_memory())
 
 
 def rotate_half(x):
