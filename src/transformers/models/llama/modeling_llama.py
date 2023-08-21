@@ -176,9 +176,10 @@ class LlamaMLP(nn.Module):
         
 
     def forward(self, x):
-        return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
-        print("\033[1;31mMemory occupied after LlamaMLP :\033[0m:")
+        print("\033[1;31mMemory occupied after mlp:\033[0m:")
         print(get_memory())
+        return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+        
 
 
 class LlamaAttention(nn.Module):
@@ -223,12 +224,15 @@ class LlamaAttention(nn.Module):
         query_states = self.q_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         print("\033[1;31mMemory occupied after LlamaAttention  query_states:\033[0m:")
         print(get_memory())
+        print("query_states tensor shape:", query_states.shape, "query_states tensor type:", query_states.dtype)
         key_states = self.k_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         print("\033[1;31mMemory occupied after LlamaAttention key_states:\033[0m:")
         print(get_memory())
+        print("key_states tensor shape:", key_states.shape, "key_states tensor type:", key_states.dtype)
         value_states = self.v_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         print("\033[1;31mMemory occupied after LlamaAttention value_states:\033[0m:")
         print(get_memory())
+        print("value_states tensor shape:", value_states.shape, "value_states tensor type:", value_states.dtype)
 
         kv_seq_len = key_states.shape[-2]
         if past_key_value is not None:
@@ -248,6 +252,7 @@ class LlamaAttention(nn.Module):
         attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
+        print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype)
         if attn_weights.size() != (bsz, self.num_heads, q_len, kv_seq_len):
             raise ValueError(
                 f"Attention weights should be of size {(bsz, self.num_heads, q_len, kv_seq_len)}, but is"
@@ -268,10 +273,11 @@ class LlamaAttention(nn.Module):
         attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights2:\033[0m:")
         print(get_memory())
+        print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype)
         attn_output = torch.matmul(attn_weights, value_states)
         print("\033[1;31mMemory occupied after LlamaAttention attn_output:\033[0m:")
         print(get_memory())
-
+        print("attn_output tensor shape:", attn_output.shape, "attn_output tensor type:", attn_output.dtype)
         if attn_output.size() != (bsz, self.num_heads, q_len, self.head_dim):
             raise ValueError(
                 f"`attn_output` should be of size {(bsz, self.num_heads, q_len, self.head_dim)}, but is"
@@ -331,6 +337,8 @@ class LlamaDecoderLayer(nn.Module):
         hidden_states = self.input_layernorm(hidden_states)
         print("\033[1;31mMemory occupied after LlamaDecoderLayer hidden_states:\033[0m:")
         print(get_memory())
+        print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype)
+        
         # Self Attention
         hidden_states, self_attn_weights, present_key_value = self.self_attn(
             hidden_states=hidden_states,
