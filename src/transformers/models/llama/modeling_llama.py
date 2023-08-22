@@ -123,15 +123,12 @@ class LlamaRotaryEmbedding(torch.nn.Module):
         if seq_len > self.max_seq_len_cached:
             self.max_seq_len_cached = seq_len
             t = torch.arange(self.max_seq_len_cached, device=x.device, dtype=self.inv_freq.dtype)
-            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding t:\033[0m:")
-            print(get_memory())
+            
             freqs = torch.einsum("i,j->ij", t, self.inv_freq)
-            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding freqs:\033[0m:")
-            print(get_memory())
+            
             # Different from paper, but it uses a different permutation in order to obtain the same calculation
             emb = torch.cat((freqs, freqs), dim=-1).to(x.device)
-            print("\033[1;31mMemory occupied after LlamaRotaryEmbedding emb:\033[0m:")
-            print(get_memory())
+            
             self.register_buffer("cos_cached", emb.cos()[None, None, :, :].to(x.dtype), persistent=False)
             self.register_buffer("sin_cached", emb.sin()[None, None, :, :].to(x.dtype), persistent=False)
         return (
@@ -180,6 +177,7 @@ class LlamaMLP(nn.Module):
         out = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
         print("\033[1;31mMemory occupied after Llamamlp:\033[0m:")
         print(get_memory())
+        print("out shape:", out.shape, "out type:", out.dtype)
         return out
 
 
