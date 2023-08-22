@@ -83,19 +83,19 @@ class LlamaRMSNorm(nn.Module):
         self.variance_epsilon = eps
 
     def forward(self, hidden_states):
-        print("\033[1;31mMemory occupied before LlamaRMSNorm forward:\033[0m:")
+        print("\033[1;31mMemory occupied before LlamaRMSNorm forward:\033[0m")
         print(get_memory())
         input_dtype = hidden_states.dtype
         variance = hidden_states.to(torch.float32).pow(2).mean(-1, keepdim=True)
-        print("\033[1;31mMemory occupied after LlamaRMSNorm variance:\033[0m:")
+        print("\033[1;31mMemory occupied after LlamaRMSNorm variance:\033[0m")
         print(get_memory())
-        print("Variance tensor shape:", variance.shape, "Variance tensor type:", variance.dtype)
+        print("Variance tensor shape:", variance.shape, "Variance tensor type:", variance.dtype, "Variance requires_grad": variance.requires_grad)
         hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
         print("\033[1;31mMemory occupied after LlamaRMSNorm hidden_states:\033[0m:")
         print(get_memory())
-        print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype)
+        print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype, "hidden_states requires_grad": hidden_states.requires_grad)
         return (self.weight * hidden_states).to(input_dtype)
-        print("\033[1;31mMemory occupied after LlamaRMSNorm return:\033[0m:")
+        print("\033[1;31mMemory occupied after LlamaRMSNorm return:\033[0m")
         print(get_memory())
 
 
@@ -138,8 +138,7 @@ class LlamaRotaryEmbedding(torch.nn.Module):
             self.cos_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
             self.sin_cached[:, :, :seq_len, ...].to(dtype=x.dtype),
             )
-        print("\033[1;31mMemory occupied after LlamaRotaryEmbedding cos_cached,sin_cached:\033[0m:")
-        print(get_memory())
+        
 
 
 def rotate_half(x):
@@ -176,10 +175,12 @@ class LlamaMLP(nn.Module):
         
 
     def forward(self, x):
-        print("\033[1;31mMemory occupied after mlp:\033[0m:")
+        print("\033[1;31mMemory occupied before Llamamlp:\033[0m:")
         print(get_memory())
-        return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
-        
+        out = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+        print("\033[1;31mMemory occupied after Llamamlp:\033[0m:")
+        print(get_memory())
+        return out
 
 
 class LlamaAttention(nn.Module):
