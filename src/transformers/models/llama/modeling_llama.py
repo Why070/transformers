@@ -245,9 +245,11 @@ class LlamaAttention(nn.Module):
             # reuse k, v, self_attention
             key_states = torch.cat([past_key_value[0], key_states], dim=2)
             value_states = torch.cat([past_key_value[1], value_states], dim=2)
-
+            
         past_key_value = (key_states, value_states) if use_cache else None
 
+        print("\033[1;31mMemory occupied after LlamaAttention past_key_value:\033[0m:")
+        print(get_memory())
         attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
@@ -353,8 +355,7 @@ class LlamaDecoderLayer(nn.Module):
         residual = hidden_states
         hidden_states = self.post_attention_layernorm(hidden_states)
         hidden_states = self.mlp(hidden_states)
-        print("\033[1;31mMemory occupied after LlamaMLP :\033[0m:")
-        print(get_memory())
+        
         hidden_states = residual + hidden_states
         
         outputs = (hidden_states,)
