@@ -250,7 +250,16 @@ class LlamaAttention(nn.Module):
 
         print("\033[1;31mMemory occupied after LlamaAttention past_key_value:\033[0m:")
         print(get_memory())
-        attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
+        a=key_states.transpose(2, 3)
+        print("\033[1;31mMemory occupied after LlamaAttention a:\033[0m:")
+        print(get_memory())
+        b=torch.matmul(query_states, a)
+        print("\033[1;31mMemory occupied after LlamaAttention b:\033[0m:")
+        print(get_memory())
+        c=math.sqrt(self.head_dim)
+        print("\033[1;31mMemory occupied after LlamaAttention c:\033[0m:")
+        print(get_memory())
+        attn_weights = b / c
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
         print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype)
