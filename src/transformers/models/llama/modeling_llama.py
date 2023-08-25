@@ -250,16 +250,11 @@ class LlamaAttention(nn.Module):
 
         print("\033[1;31mMemory occupied after LlamaAttention past_key_value:\033[0m:")
         print(get_memory())
-        a=key_states.transpose(2, 3)
-        print("\033[1;31mMemory occupied after LlamaAttention a:\033[0m:")
+        print("past_key_value tensor shape:", past_key_value.shape, "past_key_value tensor type:", past_key_value.dtype)
+        b=torch.matmul(query_states, key_states.transpose(2, 3))
+        print("\033[1;31mMemory occupied after LlamaAttention torch.matmul(query_states, key_states.transpose(2, 3)):\033[0m:")
         print(get_memory())
-        b=torch.matmul(query_states, a)
-        print("\033[1;31mMemory occupied after LlamaAttention b:\033[0m:")
-        print(get_memory())
-        c=math.sqrt(self.head_dim)
-        print("\033[1;31mMemory occupied after LlamaAttention c:\033[0m:")
-        print(get_memory())
-        attn_weights = b / c
+        attn_weights = b / math.sqrt(self.head_dim)
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
         print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype)
@@ -275,8 +270,14 @@ class LlamaAttention(nn.Module):
                     f"Attention mask should be of size {(bsz, 1, q_len, kv_seq_len)}, but is {attention_mask.size()}"
                 )
             attn_weights = attn_weights + attention_mask
+            print("\033[1;31mMemory occupied after LlamaAttention attn_mask:\033[0m:")
+            print(get_memory())
+            min = torch.tensor(torch.finfo(attn_weights.dtype).min, device=attn_weights.device)
+            print("\033[1;31mMemory occupied after LlamaAttention min[0m:")
+            print(get_memory())
+            print("min tensor shape:", min.shape, "min tensor type:", min.dtype)
             attn_weights = torch.max(
-                attn_weights, torch.tensor(torch.finfo(attn_weights.dtype).min, device=attn_weights.device)
+                attn_weights, min
             )
 
         # upcast attention to fp32
