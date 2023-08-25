@@ -256,10 +256,11 @@ class LlamaAttention(nn.Module):
         b=torch.matmul(query_states, key_states.transpose(2, 3))
         print("\033[1;31mMemory occupied after LlamaAttention torch.matmul(query_states, key_states.transpose(2, 3)):\033[0m:")
         print(get_memory())
+        print("b shape:", b.shape, "b type:", b.dtype, "b requires_grad:", b.requires_grad)
         attn_weights = b / math.sqrt(self.head_dim)
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
-        print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype)
+        print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype, "attn_weights requires_grad:", attn_weights.requires_grad)
         if attn_weights.size() != (bsz, self.num_heads, q_len, kv_seq_len):
             raise ValueError(
                 f"Attention weights should be of size {(bsz, self.num_heads, q_len, kv_seq_len)}, but is"
@@ -274,8 +275,9 @@ class LlamaAttention(nn.Module):
             attn_weights = attn_weights + attention_mask
             print("\033[1;31mMemory occupied after LlamaAttention attn_mask:\033[0m:")
             print(get_memory())
+            print("attention_mask tensor shape:", attention_mask.shape, "attention_mask tensor type:", attention_mask.dtype)
             min = torch.tensor(torch.finfo(attn_weights.dtype).min, device=attn_weights.device)
-            print("\033[1;31mMemory occupied after LlamaAttention min[0m:")
+            print("\033[1;31mMemory occupied after LlamaAttention min:\033[0m")
             print(get_memory())
             print("min tensor shape:", min.shape, "min tensor type:", min.dtype)
             attn_weights = torch.max(
@@ -283,10 +285,16 @@ class LlamaAttention(nn.Module):
             )
 
         # upcast attention to fp32
-        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+        
+        flt32attn_weights=nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32)
+        print("flt32attn_weights tensor shape:", flt32attn_weights.shape, "flt32attn_weights type:", flt32attn_weights.dtype, "flt32attn_weights requires_grad:", flt32attn_weights.requires_grad)
+        print("\033[1;31mMemory occupied after flt32attn_weights:\033[0m:")
+        print(get_memory())
+        attn_weights = flt32attn_weights.to(query_states.dtype)
+        
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights2:\033[0m:")
         print(get_memory())
-        print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype)
+        print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype, "attn_weights requires_grad:", attn_weights.requires_grad)
         attn_output = torch.matmul(attn_weights, value_states)
         print("\033[1;31mMemory occupied after LlamaAttention attn_output:\033[0m:")
         print(get_memory())
