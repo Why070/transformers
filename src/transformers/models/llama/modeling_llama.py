@@ -86,7 +86,15 @@ class LlamaRMSNorm(nn.Module):
         print("\033[1;31mMemory occupied before LlamaRMSNorm forward:\033[0m")
         print(get_memory())
         input_dtype = hidden_states.dtype
-        variance = hidden_states.to(torch.float32).pow(2).mean(-1, keepdim=True)
+        o = hidden_states.to(torch.float32)
+        print("\033[1;31mMemory occupied after hidden_states.to(torch.float32):\033[0m")
+        print(get_memory())
+        print("hidden_states1 shape:", o.shape, "hidden_states1 tensor type:", o.dtype, "hidden_states1 requires_grad:", o.requires_grad)
+        p= o.pow(2)
+        print("\033[1;31mMemory occupied after pow(2):\033[0m")
+        print(get_memory())
+        print("hidden_states2 shape:", p.shape, "hidden_states2 tensor type:", p.dtype, "hidden_states2 requires_grad:", p.requires_grad)
+        variance = p.mean(-1, keepdim=True)
         print("\033[1;31mMemory occupied after LlamaRMSNorm variance:\033[0m")
         print(get_memory())
         print("Variance tensor shape:", variance.shape, "Variance tensor type:", variance.dtype, "Variance requires_grad:", variance.requires_grad)
@@ -94,9 +102,16 @@ class LlamaRMSNorm(nn.Module):
         print("\033[1;31mMemory occupied after LlamaRMSNorm hidden_states:\033[0m:")
         print(get_memory())
         print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype, "hidden_states requires_grad:", hidden_states.requires_grad)
-        return (self.weight * hidden_states).to(input_dtype)
-        print("\033[1;31mMemory occupied after LlamaRMSNorm return:\033[0m")
+        a = self.weight * hidden_states
+        print("\033[1;31mMemory occupied after self.weight * hidden_states:\033[0m:")
         print(get_memory())
+        print("self.weight * hidden_states shape:", a.shape, "self.weight * hidden_states tensor type:", a.dtype, "self.weight * hidden_states requires_grad:", a.requires_grad)
+        out = (a).to(input_dtype)
+        print("\033[1;31mMemory occupied after to(input_dtype):\033[0m:")
+        print(get_memory())
+        print(" out shape:",  out.shape, " out type:",  out.dtype, " out requires_grad:",  out.requires_grad)
+        return out
+        
 
 
 class LlamaRotaryEmbedding(torch.nn.Module):
@@ -314,7 +329,7 @@ class LlamaAttention(nn.Module):
         attn_output = torch.matmul(attn_weights, value_states)
         print("\033[1;31mMemory occupied after LlamaAttention attn_output:\033[0m:")
         print(get_memory())
-        print("attn_output tensor shape:", attn_output.shape, "attn_output tensor type:", attn_output.dtype)
+        print("attn_output tensor shape:", attn_output.shape, "attn_output tensor type:", attn_output.dtype, "attn_output requires_grad:", attn_output.requires_grad)
         if attn_output.size() != (bsz, self.num_heads, q_len, self.head_dim):
             raise ValueError(
                 f"`attn_output` should be of size {(bsz, self.num_heads, q_len, self.head_dim)}, but is"
