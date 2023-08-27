@@ -186,7 +186,7 @@ class LlamaMLP(nn.Module):
         print("\033[1;31mMemory occupied after self.down_proj(b):\033[0m:")
         print(get_memory())
         print("self.down_proj(b) shape:", c.shape, "self.down_proj(b) type:", c.dtype , "self.down_proj(b) requires_grad:", c.requires_grad)
-        out = c * self.up_proj(x))
+        out = c * self.up_proj(x)
         print("\033[1;31mMemory occupied after Llamamlp:\033[0m:")
         print(get_memory())
         print("out shape:", out.shape, "out type:", out.dtype , "out requires_grad:", out.requires_grad)
