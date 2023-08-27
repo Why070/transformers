@@ -181,15 +181,19 @@ class LlamaMLP(nn.Module):
         b= self.act_fn(a)
         print("\033[1;31mMemory occupied after self.act_fn(a):\033[0m:")
         print(get_memory())
-        print("self.act_fn(a) shape:", b.shape, "self.act_fn(a) type:", b.dtype , "self.act_fn(a) requires_grad:", b.requires_grad)
-        c= self.down_proj(b)
-        print("\033[1;31mMemory occupied after self.down_proj(b):\033[0m:")
+        print("self.act_fn shape:", b.shape, "self.act_fn type:", b.dtype , "self.act_fn requires_grad:", b.requires_grad)
+        c= self.up_proj(x)
+        print("\033[1;31mMemory occupied after self.up_proj(x):\033[0m:")
         print(get_memory())
-        print("self.down_proj(b) shape:", c.shape, "self.down_proj(b) type:", c.dtype , "self.down_proj(b) requires_grad:", c.requires_grad)
-        out = c * self.up_proj(x)
+        print(" self.up_proj(x) shape:", c.shape, " self.up_proj(x) type:", c.dtype , " self.up_proj(x) requires_grad:", c.requires_grad)
+        d = b*c
+        print("\033[1;31mMemory occupied after b * self.up_proj(x):\033[0m:")
+        print(get_memory())
+        print("self.act_fn(self.gate_proj(x)) * self.up_proj(x) shape:", d.shape, "self.act_fn(self.gate_proj(x)) * self.up_proj(x) type:", d.dtype , "self.act_fn(self.gate_proj(x)) * self.up_proj(x) requires_grad:", d.requires_grad)
+        out = self.down_proj(d)
         print("\033[1;31mMemory occupied after Llamamlp:\033[0m:")
         print(get_memory())
-        print("out shape:", out.shape, "out type:", out.dtype , "out requires_grad:", out.requires_grad)
+        print("down_proj shape:", out.shape, "down_proj type:", out.dtype , "down_proj requires_grad:", out.requires_grad)
         return out
 
 
