@@ -640,9 +640,9 @@ class LlamaModel(LlamaPreTrainedModel):
             inputs_embeds = self.embed_tokens(input_ids)
             print("\033[1;31mMemory occupied after inputs_embeds:\033[0m")
             print(get_memory())
+            print("inputs_embeds shape:", inputs_embeds.shape, "inputs_embeds type:", inputs_embeds.dtype, "inputs_embeds requires_grad:", inputs_embeds.requires_grad)
         # embed positions
-        print("\033[1;31mMemory occupied before attention_mask:\033[0m")
-        print(get_memory())
+        
         if attention_mask is None:
             attention_mask = torch.ones(
                 (batch_size, seq_length_with_past), dtype=torch.bool, device=inputs_embeds.device
@@ -650,8 +650,7 @@ class LlamaModel(LlamaPreTrainedModel):
         attention_mask = self._prepare_decoder_attention_mask(
             attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
         )
-        print("\033[1;31mMemory occupied after attention_mask :\033[0m")
-        print(get_memory())
+        
         
         hidden_states = inputs_embeds
         
@@ -673,17 +672,15 @@ class LlamaModel(LlamaPreTrainedModel):
                 
                 all_hidden_states += (hidden_states,)
                 
-            print("\033[1;31mMemory occupied before past_key_value:\033[0m")
-            print(get_memory())
+           
             past_key_value = past_key_values[idx] if past_key_values is not None else None
-            print("\033[1;31mMemory occupied after past_key_value:\033[0m")
-            print(get_memory())
+            
 
            
-            print("\033[1;31mMemory occupied before layer_outputs:\033[0m")
-            print(get_memory())
+            
             if self.gradient_checkpointing and self.training:
-
+                print("\033[1;31mMemory occupied before self.gradient_checkpointing:\033[0m")
+                print(get_memory())
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
                         # None for past_key_value
@@ -698,6 +695,8 @@ class LlamaModel(LlamaPreTrainedModel):
                     position_ids,
                     None,
                 )
+                print("\033[1;31mMemory occupied after self.gradient_checkpointing:\033[0m")
+                print(get_memory())
             else:
                 layer_outputs = decoder_layer(
                     hidden_states,
@@ -707,8 +706,7 @@ class LlamaModel(LlamaPreTrainedModel):
                     output_attentions=output_attentions,
                     use_cache=use_cache,
                 )
-            print("\033[1;31mMemory occupied after layer_outputs:\033[0m")
-            print(get_memory())
+            
             hidden_states = layer_outputs[0]
             
             if use_cache:
