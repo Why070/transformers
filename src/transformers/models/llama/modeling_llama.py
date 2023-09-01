@@ -667,7 +667,7 @@ class LlamaModel(LlamaPreTrainedModel):
         all_self_attns = () if output_attentions else None
         next_decoder_cache = () if use_cache else None
 
-       for idx, decoder_layer in enumerate(self.layers):
+        for idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
                 print("\033[1;31mMemory occupied before all_hidden_states:\033[0m")
                 print(get_memory())
