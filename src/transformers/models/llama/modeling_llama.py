@@ -597,14 +597,22 @@ class LlamaModel(LlamaPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, BaseModelOutputWithPast]:
+        print("\033[1;31mMemory occupied before  output_attentions:\033[0m")
+        print(get_memory())
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
+        print("\033[1;31mMemory occupied after  output_attentions:\033[0m")
+        print(get_memory())
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
         )
+        print("\033[1;31mMemory occupied after  output_hidden_states:\033[0m")
+        print(get_memory())
         use_cache = use_cache if use_cache is not None else self.config.use_cache
-
+        print("\033[1;31mMemory occupied after use_cache:\033[0m")
+        print(get_memory())
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
-
+        print("\033[1;31mMemory occupied after return_dict:\033[0m")
+        print(get_memory())
         # retrieve input_ids and inputs_embeds
         if input_ids is not None and inputs_embeds is not None:
             raise ValueError("You cannot specify both decoder_input_ids and decoder_inputs_embeds at the same time")
@@ -641,8 +649,11 @@ class LlamaModel(LlamaPreTrainedModel):
         attention_mask = self._prepare_decoder_attention_mask(
             attention_mask, (batch_size, seq_length), inputs_embeds, past_key_values_length
         )
-
+        print("\033[1;31mMemory occupied before hidden_states:\033[0m")
+        print(get_memory())
         hidden_states = inputs_embeds
+        print("\033[1;31mMemory occupied after hidden_states:\033[0m")
+        print(get_memory())
 
         if self.gradient_checkpointing and self.training:
             if use_cache:
@@ -656,11 +667,17 @@ class LlamaModel(LlamaPreTrainedModel):
         all_self_attns = () if output_attentions else None
         next_decoder_cache = () if use_cache else None
 
-        for idx, decoder_layer in enumerate(self.layers):
+       for idx, decoder_layer in enumerate(self.layers):
             if output_hidden_states:
+                print("\033[1;31mMemory occupied before all_hidden_states:\033[0m")
+                print(get_memory())
                 all_hidden_states += (hidden_states,)
+                print("\033[1;31mMemory occupied after all_hidden_states:\033[0m")
+                print(get_memory())
 
             past_key_value = past_key_values[idx] if past_key_values is not None else None
+
+           
 
             if self.gradient_checkpointing and self.training:
 
@@ -687,22 +704,31 @@ class LlamaModel(LlamaPreTrainedModel):
                     output_attentions=output_attentions,
                     use_cache=use_cache,
                 )
-
+            print("\033[1;31mMemory occupied before hidden_states:\033[0m")
+            print(get_memory())
             hidden_states = layer_outputs[0]
-
+            print("\033[1;31mMemory occupied after hidden_states:\033[0m")
+            print(get_memory())
             if use_cache:
                 next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
-
+                print("\033[1;31mMemory occupied after next_decoder_cache:\033[0m")
+                print(get_memory())
             if output_attentions:
                 all_self_attns += (layer_outputs[1],)
-
+                print("\033[1;31mMemory occupied after all_self_attns:\033[0m")
+                print(get_memory())
         hidden_states = self.norm(hidden_states)
-
+        print("\033[1;31mMemory occupied after hidden_states2:\033[0m")
+        print(get_memory())
         # add hidden states from the last decoder layer
         if output_hidden_states:
             all_hidden_states += (hidden_states,)
+            print("\033[1;31mMemory occupied after all_hidden_states:\033[0m")
+            print(get_memory())
 
         next_cache = next_decoder_cache if use_cache else None
+        print("\033[1;31mMemory occupied after next_cache:\033[0m")
+        print(get_memory())
         if not return_dict:
             return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
         return BaseModelOutputWithPast(
