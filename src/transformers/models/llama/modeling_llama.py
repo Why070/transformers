@@ -679,8 +679,7 @@ class LlamaModel(LlamaPreTrainedModel):
            
             
             if self.gradient_checkpointing and self.training:
-                print("\033[1;31mMemory occupied before self.gradient_checkpointing:\033[0m")
-                print(get_memory())
+                
                 def create_custom_forward(module):
                     def custom_forward(*inputs):
                         # None for past_key_value
@@ -695,9 +694,10 @@ class LlamaModel(LlamaPreTrainedModel):
                     position_ids,
                     None,
                 )
-                print("\033[1;31mMemory occupied after self.gradient_checkpointing:\033[0m")
-                print(get_memory())
+                
             else:
+                print("\033[1;31mMemory occupied before layer_outputs\033[0m")
+                print(get_memory())
                 layer_outputs = decoder_layer(
                     hidden_states,
                     attention_mask=attention_mask,
@@ -706,29 +706,26 @@ class LlamaModel(LlamaPreTrainedModel):
                     output_attentions=output_attentions,
                     use_cache=use_cache,
                 )
+                print("\033[1;31mMemory occupied after layer_outputs:\033[0m")
+                print(get_memory())
             
             hidden_states = layer_outputs[0]
             
             if use_cache:
                 next_decoder_cache += (layer_outputs[2 if output_attentions else 1],)
-                print("\033[1;31mMemory occupied after next_decoder_cache:\033[0m")
-                print(get_memory())
+                
             if output_attentions:
                 all_self_attns += (layer_outputs[1],)
-                print("\033[1;31mMemory occupied after all_self_attns:\033[0m")
-                print(get_memory())
+                
         hidden_states = self.norm(hidden_states)
-        print("\033[1;31mMemory occupied after hidden_states2:\033[0m")
-        print(get_memory())
+        
         # add hidden states from the last decoder layer
         if output_hidden_states:
             all_hidden_states += (hidden_states,)
-            print("\033[1;31mMemory occupied after all_hidden_states:\033[0m")
-            print(get_memory())
+            
 
         next_cache = next_decoder_cache if use_cache else None
-        print("\033[1;31mMemory occupied after next_cache:\033[0m")
-        print(get_memory())
+        
         if not return_dict:
             return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
         return BaseModelOutputWithPast(
