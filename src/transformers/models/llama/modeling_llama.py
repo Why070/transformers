@@ -254,15 +254,15 @@ class LlamaAttention(nn.Module):
         query_states = self.q_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         print("\033[1;31mMemory occupied after LlamaAttention  query_states:\033[0m:")
         print(get_memory())
-        print("query_states tensor shape:", query_states.shape, "query_states tensor type:", query_states.dtype)
+        print("query_states tensor shape:", query_states.shape, "query_states tensor type:", query_states.dtype , "query_states requires_grad:", query_states.requires_grad)
         key_states = self.k_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         print("\033[1;31mMemory occupied after LlamaAttention key_states:\033[0m:")
         print(get_memory())
-        print("key_states tensor shape:", key_states.shape, "key_states tensor type:", key_states.dtype)
+        print("key_states tensor shape:", key_states.shape, "key_states tensor type:", key_states.dtype, "key_states requires_grad:", key_states.requires_grad)
         value_states = self.v_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         print("\033[1;31mMemory occupied after LlamaAttention value_states:\033[0m:")
         print(get_memory())
-        print("value_states tensor shape:", value_states.shape, "value_states tensor type:", value_states.dtype)
+        print("value_states tensor shape:", value_states.shape, "value_states tensor type:", value_states.dtype, "value_states requires_grad:", value_states.requires_grad)
 
         kv_seq_len = key_states.shape[-2]
         if past_key_value is not None:
