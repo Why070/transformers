@@ -2789,15 +2789,7 @@ class Trainer:
             return print_intermediate_output
 
         # 注册钩子函数
-        hook_handles = []
-        for module_name, module in model.named_modules():
-            hook_fn = create_hook_fn(module_name)
-            hook_handles.append(module.register_forward_hook(hook_fn))
-            
-
-        print("\033[1;31mMemory occupied before output:\033[0m:")
-        print(get_memory())
-        print(get_memory_stats())
+       
         
         
         
@@ -2806,39 +2798,14 @@ class Trainer:
         else:
             labels = None
         outputs = model(**inputs)
-        for module in model.modules():
-            if hasattr(module, "mem_rss_diff"):
-                print(f"Module: {module.__class__.__name__}, Memory Diff: {module.mem_rss_diff}")
-        
-        print("\033[1;31mMemory occupied after output:\033[0m:")
-        print(get_memory())
-        print(get_memory_stats())
-
-        
-        for intermediate_output, module_name in intermediate_outputs:
-            if isinstance(intermediate_output, torch.Tensor):  
-                print(f"模块 '{module_name}' 输出大小:", intermediate_output.shape, "输出数据类型:", intermediate_output.dtype)
-            else:
-                if hasattr(intermediate_output, 'last_hidden_state'):  
-                    last_hidden_state = intermediate_output.last_hidden_state
-                    print(f"模块 '{module_name}' 中间输出 last_hidden_state 大小:", last_hidden_state.shape, "输出数据类型:", last_hidden_state.dtype)
-                if hasattr(intermediate_output, 'logits'):  
-                    logits = intermediate_output.logits
-                    print(f"模块 '{module_name}' 中间输出 logits 大小:", logits.shape, "输出数据类型:", logits.dtype)
-                else: print(intermediate_output)
-            
-
-        # 注销钩子函数
-        for handle in hook_handles:
-            handle.remove()
+       
         # Save past state if it exists
         # TODO: this needs to be fixed and made cleaner later.
  
         
         if self.args.past_index >= 0:
             self._past = outputs[self.args.past_index]
-            print("\033[1;31mMemory occupied after selfpast:\033[0m:")
-            print(get_memory()) 
+            
 
             
 
