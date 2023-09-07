@@ -71,7 +71,9 @@ def _expand_mask(mask: torch.Tensor, dtype: torch.dtype, tgt_len: Optional[int] 
     return inverted_mask.masked_fill(inverted_mask.to(torch.bool), torch.finfo(dtype).min)
 
 def get_memory():
-    return torch.cuda.memory_allocated()/1024/1024
+    allocated_memory = torch.cuda.memory_allocated() / 1024 / 1024
+    reserved_memory = torch.cuda.memory_reserved() / 1024 / 1024
+    return f"Allocated Memory: {allocated_memory:.2f} MB, Reserved Memory: {reserved_memory:.2f} MB"
 
 class LlamaRMSNorm(nn.Module):
     def __init__(self, hidden_size, eps=1e-6):
