@@ -89,29 +89,39 @@ class LlamaRMSNorm(nn.Module):
         print(get_memory())
         input_dtype = hidden_states.dtype
         o = hidden_states.to(torch.float32)
+        """
         print("\033[1;31mMemory occupied after hidden_states.to(torch.float32):\033[0m")
         print(get_memory())
         print("hidden_states1 shape:", o.shape, "hidden_states1 tensor type:", o.dtype, "hidden_states1 requires_grad:", o.requires_grad)
+        """
         p= o.pow(2)
+        """
         print("\033[1;31mMemory occupied after pow(2):\033[0m")
         print(get_memory())
         print("hidden_states2 shape:", p.shape, "hidden_states2 tensor type:", p.dtype, "hidden_states2 requires_grad:", p.requires_grad)
+        """
         variance = p.mean(-1, keepdim=True)
+        """
         print("\033[1;31mMemory occupied after LlamaRMSNorm variance:\033[0m")
         print(get_memory())
         print("Variance tensor shape:", variance.shape, "Variance tensor type:", variance.dtype, "Variance requires_grad:", variance.requires_grad)
+        """
         hidden_states = hidden_states * torch.rsqrt(variance + self.variance_epsilon)
         print("\033[1;31mMemory occupied after LlamaRMSNorm hidden_states:\033[0m:")
         print(get_memory())
         print("hidden_states shape:", hidden_states.shape, "hidden_states tensor type:", hidden_states.dtype, "hidden_states requires_grad:", hidden_states.requires_grad)
         a = self.weight * hidden_states
+        """
         print("\033[1;31mMemory occupied after self.weight * hidden_states:\033[0m:")
         print(get_memory())
         print("self.weight * hidden_states shape:", a.shape, "self.weight * hidden_states tensor type:", a.dtype, "self.weight * hidden_states requires_grad:", a.requires_grad)
+        """
         out = (a).to(input_dtype)
+        """
         print("\033[1;31mMemory occupied after to(input_dtype):\033[0m:")
         print(get_memory())
         print(" out shape:",  out.shape, " out type:",  out.dtype, " out requires_grad:",  out.requires_grad)
+        """
         return out
         
 
@@ -192,25 +202,35 @@ class LlamaMLP(nn.Module):
         print("\033[1;31mMemory occupied before Llamamlp:\033[0m:")
         print(get_memory())
         a= self.gate_proj(x)
+        """
         print("\033[1;31mMemory occupied after self.gate_proj(x):\033[0m:")
         print(get_memory())
         print("self.gate_proj(x) shape:", a.shape, "self.gate_proj(x) type:", a.dtype , "self.gate_proj(x) requires_grad:", a.requires_grad)
+        """
         b= self.act_fn(a)
+        """
         print("\033[1;31mMemory occupied after self.act_fn(a):\033[0m:")
         print(get_memory())
         print("self.act_fn shape:", b.shape, "self.act_fn type:", b.dtype , "self.act_fn requires_grad:", b.requires_grad)
+        """
         c= self.up_proj(x)
+        """
         print("\033[1;31mMemory occupied after self.up_proj(x):\033[0m:")
         print(get_memory())
         print(" self.up_proj(x) shape:", c.shape, " self.up_proj(x) type:", c.dtype , " self.up_proj(x) requires_grad:", c.requires_grad)
+        """
         d = b*c
+        """
         print("\033[1;31mMemory occupied after b * self.up_proj(x):\033[0m:")
         print(get_memory())
         print("self.act_fn(self.gate_proj(x)) * self.up_proj(x) shape:", d.shape, "self.act_fn(self.gate_proj(x)) * self.up_proj(x) type:", d.dtype , "self.act_fn(self.gate_proj(x)) * self.up_proj(x) requires_grad:", d.requires_grad)
+        """
         out = self.down_proj(d)
+        """
         print("\033[1;31mMemory occupied after Llamamlp:\033[0m:")
         print(get_memory())
         print("down_proj shape:", out.shape, "down_proj type:", out.dtype , "down_proj requires_grad:", out.requires_grad)
+        """
         return out
 
 
@@ -254,17 +274,23 @@ class LlamaAttention(nn.Module):
         print("\033[1;31mMemory occupied before LlamaAttention  query_states:\033[0m:")
         print(get_memory())
         query_states = self.q_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        """
         print("\033[1;31mMemory occupied after LlamaAttention  query_states:\033[0m:")
         print(get_memory())
         print("query_states tensor shape:", query_states.shape, "query_states tensor type:", query_states.dtype , "query_states requires_grad:", query_states.requires_grad)
+        """
         key_states = self.k_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        """
         print("\033[1;31mMemory occupied after LlamaAttention key_states:\033[0m:")
         print(get_memory())
         print("key_states tensor shape:", key_states.shape, "key_states tensor type:", key_states.dtype, "key_states requires_grad:", key_states.requires_grad)
+        """
         value_states = self.v_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        """
         print("\033[1;31mMemory occupied after LlamaAttention value_states:\033[0m:")
         print(get_memory())
         print("value_states tensor shape:", value_states.shape, "value_states tensor type:", value_states.dtype, "value_states requires_grad:", value_states.requires_grad)
+        """
 
         kv_seq_len = key_states.shape[-2]
         if past_key_value is not None:
@@ -288,14 +314,18 @@ class LlamaAttention(nn.Module):
         
         b=torch.matmul(query_states, key_states.transpose(2, 3))
         torch.cuda.empty_cache()
+        """
         print("\033[1;31mMemory occupied after LlamaAttention torch.matmul(query_states, key_states.transpose(2, 3)):\033[0m:")
         print(get_memory())
         print("b shape:", b.shape, "b type:", b.dtype, "b requires_grad:", b.requires_grad)
+        """
         attn_weights = b / math.sqrt(self.head_dim)
         torch.cuda.empty_cache()
+        """
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
         print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype, "attn_weights requires_grad:", attn_weights.requires_grad)
+        """
         if attn_weights.size() != (bsz, self.num_heads, q_len, kv_seq_len):
             raise ValueError(
                 f"Attention weights should be of size {(bsz, self.num_heads, q_len, kv_seq_len)}, but is"
@@ -309,14 +339,18 @@ class LlamaAttention(nn.Module):
                 )
             attn_weights = attn_weights + attention_mask
             torch.cuda.empty_cache()
+            """
             print("\033[1;31mMemory occupied after LlamaAttention attn_mask:\033[0m:")
             print(get_memory())
             print("attention_mask tensor shape:", attention_mask.shape, "attention_mask tensor type:", attention_mask.dtype)
+            """
             min = torch.tensor(torch.finfo(attn_weights.dtype).min, device=attn_weights.device)
             torch.cuda.empty_cache()
+            """
             print("\033[1;31mMemory occupied after LlamaAttention min:\033[0m")
             print(get_memory())
             print("min tensor shape:", min.shape, "min tensor type:", min.dtype)
+            """
             attn_weights = torch.max(
                 attn_weights, min
             )
@@ -325,14 +359,18 @@ class LlamaAttention(nn.Module):
         
         flt32attn_weights=nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32)
         torch.cuda.empty_cache()
+        """
         print("flt32attn_weights tensor shape:", flt32attn_weights.shape, "flt32attn_weights type:", flt32attn_weights.dtype, "flt32attn_weights requires_grad:", flt32attn_weights.requires_grad)
         print("\033[1;31mMemory occupied after flt32attn_weights:\033[0m:")
         print(get_memory())
+        """
         attn_weights = flt32attn_weights.to(query_states.dtype)
         torch.cuda.empty_cache()
+        """
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights2:\033[0m:")
         print(get_memory())
         print("attn_weights tensor shape:", attn_weights.shape, "attn_weights tensor type:", attn_weights.dtype, "attn_weights requires_grad:", attn_weights.requires_grad)
+        """
         attn_output = torch.matmul(attn_weights, value_states)
         print("\033[1;31mMemory occupied after LlamaAttention attn_output:\033[0m:")
         torch.cuda.empty_cache()
