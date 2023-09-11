@@ -2791,6 +2791,8 @@ class Trainer:
         # 注册钩子函数
        
         
+        print("\033[1;31mMemory occupied before output:\033[0m:")
+        print(get_memory())
         
         
         if self.label_smoother is not None and "labels" in inputs:
@@ -2798,7 +2800,9 @@ class Trainer:
         else:
             labels = None
         outputs = model(**inputs)
-       
+        print("\033[1;31mMemory occupied after output:\033[0m:")
+        print(get_memory())
+        
         # Save past state if it exists
         # TODO: this needs to be fixed and made cleaner later.
  
