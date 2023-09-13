@@ -313,14 +313,14 @@ class LlamaAttention(nn.Module):
         print(get_memory())
         
         b=torch.matmul(query_states, key_states.transpose(2, 3))
-        torch.cuda.empty_cache()
+        
         """
         print("\033[1;31mMemory occupied after LlamaAttention torch.matmul(query_states, key_states.transpose(2, 3)):\033[0m:")
         print(get_memory())
         print("b shape:", b.shape, "b type:", b.dtype, "b requires_grad:", b.requires_grad)
         """
         attn_weights = b / math.sqrt(self.head_dim)
-        torch.cuda.empty_cache()
+        
         """
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights1:\033[0m:")
         print(get_memory())
@@ -338,14 +338,14 @@ class LlamaAttention(nn.Module):
                     f"Attention mask should be of size {(bsz, 1, q_len, kv_seq_len)}, but is {attention_mask.size()}"
                 )
             attn_weights = attn_weights + attention_mask
-            torch.cuda.empty_cache()
+            
             """
             print("\033[1;31mMemory occupied after LlamaAttention attn_mask:\033[0m:")
             print(get_memory())
             print("attention_mask tensor shape:", attention_mask.shape, "attention_mask tensor type:", attention_mask.dtype)
             """
             min = torch.tensor(torch.finfo(attn_weights.dtype).min, device=attn_weights.device)
-            torch.cuda.empty_cache()
+            
             """
             print("\033[1;31mMemory occupied after LlamaAttention min:\033[0m")
             print(get_memory())
@@ -358,14 +358,14 @@ class LlamaAttention(nn.Module):
         # upcast attention to fp32
         
         flt32attn_weights=nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32)
-        torch.cuda.empty_cache()
+        
         """
         print("flt32attn_weights tensor shape:", flt32attn_weights.shape, "flt32attn_weights type:", flt32attn_weights.dtype, "flt32attn_weights requires_grad:", flt32attn_weights.requires_grad)
         print("\033[1;31mMemory occupied after flt32attn_weights:\033[0m:")
         print(get_memory())
         """
         attn_weights = flt32attn_weights.to(query_states.dtype)
-        torch.cuda.empty_cache()
+        
         """
         print("\033[1;31mMemory occupied after LlamaAttention attn_weights2:\033[0m:")
         print(get_memory())
@@ -373,6 +373,11 @@ class LlamaAttention(nn.Module):
         """
         attn_output = torch.matmul(attn_weights, value_states)
         print("\033[1;31mMemory occupied after LlamaAttention attn_output:\033[0m:")
+        print(get_memory())
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
         torch.cuda.empty_cache()
         print(get_memory())
         print("attn_output tensor shape:", attn_output.shape, "attn_output tensor type:", attn_output.dtype, "attn_output requires_grad:", attn_output.requires_grad)
