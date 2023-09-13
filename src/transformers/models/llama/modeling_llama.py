@@ -117,7 +117,12 @@ class LlamaRMSNorm(nn.Module):
         print("self.weight * hidden_states shape:", a.shape, "self.weight * hidden_states tensor type:", a.dtype, "self.weight * hidden_states requires_grad:", a.requires_grad)
         
         out = (a).to(input_dtype)
-        
+        print(get_memory())
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
         print("\033[1;31mMemory occupied after to(input_dtype):\033[0m:")
         print(get_memory())
         print(" out shape:",  out.shape, " out type:",  out.dtype, " out requires_grad:",  out.requires_grad)
