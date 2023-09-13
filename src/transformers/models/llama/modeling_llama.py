@@ -860,6 +860,7 @@ class LlamaModel(LlamaPreTrainedModel):
         torch.cuda.empty_cache()
         torch.cuda.empty_cache()
         print("\033[1;31mMemory occupied after empty cache:\033[0m")
+        print(get_memory())
         if not return_dict:
             return tuple(v for v in [hidden_states, next_cache, all_hidden_states, all_self_attns] if v is not None)
         return BaseModelOutputWithPast(
