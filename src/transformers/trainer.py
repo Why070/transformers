@@ -235,6 +235,11 @@ SCHEDULER_NAME = "scheduler.pt"
 SCALER_NAME = "scaler.pt"
 last_memory = 0
 
+def get_memory():
+    allocated_memory = torch.cuda.memory_allocated() / 1024 / 1024
+    reserved_memory = torch.cuda.memory_reserved() / 1024 / 1024
+    return f"Allocated Memory: {allocated_memory:.2f} MB, Reserved Memory: {reserved_memory:.2f} MB"
+
 class Trainer:
     """
     Trainer is a simple but feature-complete training and eval loop for PyTorch, optimized for 🤗 Transformers.
@@ -1929,13 +1934,12 @@ class Trainer:
                     else:
                         print("\033[1;31mMemory occupied before optimizer:\033[0m:")
                         print(get_memory())
-                        print("\033[1;31mMemory occupied before optimizer:\033[0m:")
-                        print(get_gpu_memory_usage())
+                        
                         self.optimizer.step()
+                        
                         print("\033[1;31mMemory occupied after optimizer:\033[0m:")
                         print(get_memory())
-                        print("\033[1;31mMemory occupied after optimizer:\033[0m:")
-                        print(get_gpu_memory_usage())
+                        
                         
                         optimizer_was_run = not self.accelerator.optimizer_step_was_skipped
 
@@ -2716,8 +2720,7 @@ class Trainer:
         model.train()
         inputs = self._prepare_inputs(inputs)
 
-        def get_memory():
-             return str(torch.cuda.memory_summary())   
+         
                
 
         def get_gpu_memory_usage():
@@ -2729,28 +2732,40 @@ class Trainer:
                 
         
         if is_sagemaker_mp_enabled():
-            print("loss mbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+            print("\033[1;31mMemory occupied before backward:\033[0m")
+            print(get_memory())
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
+            print("\033[1;31mMemory occupied after backward:\033[0m")
+            print(get_memory())
             return loss_mb.reduce_mean().detach().to(self.args.device)
 
 
         with self.compute_loss_context_manager():
             loss = self.compute_loss(model, inputs)
-
+            print("\033[1;31mMemory occupied 1:\033[0m")
+            print(get_memory())
        
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
-
+            print("\033[1;31mMemory occupied 2:\033[0m")
+            print(get_memory())
+        
         if self.do_grad_scaling:
-            self.scaler.scale(loss).backward()        
+            self.scaler.scale(loss).backward()   
+            print("\033[1;31mMemory occupied 3:\033[0m")
+            print(get_memory())
            
         
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                 scaled_loss.backward()
+                print("\033[1;31mMemory occupied 4:\033[0m")
+                print(get_memory())
             
         else:
             self.accelerator.backward(loss)
+            print("\033[1;31mMemory occupied 5:\033[0m")
+            print(get_memory())
     
 
 
