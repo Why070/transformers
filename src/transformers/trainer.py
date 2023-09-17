@@ -2732,39 +2732,38 @@ class Trainer:
                 
         
         if is_sagemaker_mp_enabled():
-            print("\033[1;31mMemory occupied before backward:\033[0m")
-            print(get_memory())
+            
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
-            print("\033[1;31mMemory occupied after backward:\033[0m")
-            print(get_memory())
+            
             return loss_mb.reduce_mean().detach().to(self.args.device)
 
 
         with self.compute_loss_context_manager():
+            print("\033[1;31mMemory occupied before computeloss:\033[0m")
+            print(get_memory())
             loss = self.compute_loss(model, inputs)
-            print("\033[1;31mMemory occupied 1:\033[0m")
+            print("\033[1;31mMemory occupied after computeloss:\033[0m")
             print(get_memory())
        
         if self.args.n_gpu > 1:
             loss = loss.mean()  # mean() to average on multi-gpu parallel training
-            print("\033[1;31mMemory occupied 2:\033[0m")
-            print(get_memory())
+            
         
         if self.do_grad_scaling:
             self.scaler.scale(loss).backward()   
-            print("\033[1;31mMemory occupied 3:\033[0m")
-            print(get_memory())
+            
            
         
         elif self.use_apex:
             with amp.scale_loss(loss, self.optimizer) as scaled_loss:
                 scaled_loss.backward()
-                print("\033[1;31mMemory occupied 4:\033[0m")
-                print(get_memory())
+                
             
         else:
+            print("\033[1;31mMemory occupied before backward:\033[0m")
+            print(get_memory())
             self.accelerator.backward(loss)
-            print("\033[1;31mMemory occupied 5:\033[0m")
+            print("\033[1;31mMemory occupied after backward:\033[0m")
             print(get_memory())
     
 
