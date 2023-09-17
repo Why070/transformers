@@ -2762,9 +2762,13 @@ class Trainer:
         else:
             print("\033[1;31mMemory occupied before backward:\033[0m")
             print(get_memory())
+            for name, param in model.named_parameters():
+                print(f"Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
             self.accelerator.backward(loss)
             print("\033[1;31mMemory occupied after backward:\033[0m")
             print(get_memory())
+            for name, param in model.named_parameters():
+                print(f"Name: {name}, Shape: {param.shape}, Type: {param.dtype}")
     
 
 
